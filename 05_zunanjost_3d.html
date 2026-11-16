@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiša G · Zunanjost 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#DCE6EC;--panel:rgba(251,248,243,.94);--ink:#2E2925;--muted:#6E645A;--line:#DDD3C6;--accent:#B0703F}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1D1A17;--panel:rgba(38,34,30,.94);--ink:#EEE7DD;--muted:#B2A89C;--line:#3D3731;--accent:#D49A6A}}
+:root[data-theme="dark"]{--bg:#1D1A17;--panel:rgba(38,34,30,.94);--ink:#EEE7DD;--muted:#B2A89C;--line:#3D3731;--accent:#D49A6A}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif;overflow:hidden}
+#view{position:fixed;inset:0}
+.panel{position:fixed;top:16px;left:16px;width:320px;max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;backdrop-filter:blur(6px);z-index:3;box-sizing:border-box}
+.panel.min .body{display:none}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+h1{font:500 26px/1.1 "EB Garamond",Georgia,serif;margin:0 0 4px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+.lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:12px 0 6px}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+button{font:500 12.5px Inter,sans-serif;border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 10px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.small{padding:3px 8px;font-size:11.5px}
+.tg{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.tg label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.rng{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:4px 0}
+.rng input{flex:1}
+.rng span{min-width:46px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.mat{border-top:1px solid var(--line);padding:8px 0}
+.mat:first-child{border-top:0}
+.mrow{display:flex;align-items:center;gap:8px}
+.mrow b{font-weight:600;font-size:13px;flex:1}
+.mrow input[type=color]{width:34px;height:24px;border:1px solid var(--line);border-radius:4px;padding:0;background:none;cursor:pointer}
+.mnote{font-size:11.5px;color:var(--muted);margin:2px 0 5px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;border:1px solid var(--line);border-radius:999px;padding:2px 8px 2px 3px;cursor:pointer;background:transparent;color:var(--ink)}
+.chip i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block}
+.hint{position:fixed;bottom:14px;right:16px;max-width:560px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;z-index:3}
+#err{display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:24px;text-align:center}
+@media (max-width:640px){.panel{left:8px;right:8px;top:8px;width:auto;max-height:55vh}.hint{display:none}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="view"></div>
+<div class="panel" id="panel">
+  <div class="head"><div><h1>Zunanjost v 3D</h1></div><button class="small" id="minBtn" type="button">Skrij</button></div>
+  <div class="body">
+    <p class="sub">Mere in višine iz PZI arhitekture, materiali po PZI: lesena fasada, plošče Swisspearl, vlaknocementna kritina. Barve lahko zamenjaš spodaj.</p>
+    <div class="lab">Pogled</div>
+    <div class="btns" id="views"></div>
+    <div class="lab">Prikaz</div>
+    <div class="tg">
+      <label><input type="checkbox" id="tSite" checked> Okolica in vrt</label>
+      <label><input type="checkbox" id="tTrees" checked> Drevesa</label>
+      <label><input type="checkbox" id="tParcel"> Meja parcele</label>
+      <label><input type="checkbox" id="tCarport" checked> Nadstrešnica s kolesarnico</label>
+      <label><input type="checkbox" id="tSun" checked> Sonce, sence in ura dneva</label>
+    </div>
+    <div class="rng"><label for="hour">Ura</label><input type="range" id="hour" min="6" max="21.5" step="0.25" value="15"><span id="hourV">15:00</span></div>
+    <div class="rng"><label for="blind">Žaluzije</label><input type="range" id="blind" min="0" max="100" step="5" value="0"><span id="blindV">dvignjene</span></div>
+    <div class="lab">Barve materialov</div>
+    <div id="mats"></div>
+    <div class="btns" style="margin-top:10px"><button type="button" id="copyBtn">Kopiraj izbor barv</button><button type="button" id="resetBtn">Ponastavi</button></div>
+    <p class="sub" style="margin-top:10px">Barve na zaslonu so približek. Končni ton izberita po vzorcu plošč, kritine in lesa ob dnevni svetlobi.</p>
+  </div>
+</div>
+<div class="hint">Vrti z miško ali prstom, približaj s kolescem. Okolica in vrt sta poenostavljena po situaciji in prerezih PZI.</div>
+<div id="err">3D pogled potrebuje WebGL in internetno povezavo za knjižnico three.js.</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ---------- renderer, scene ---------- */
+const host = document.getElementById('view');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); }
+catch (e) { document.getElementById('err').style.display = 'flex'; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.82;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+host.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environment = envTex;
+function skyTex(top, mid, bot) { const c = document.createElement('canvas'); c.width = 4; c.height = 256; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, top); gr.addColorStop(0.6, mid); gr.addColorStop(1, bot); g.fillStyle = gr; g.fillRect(0, 0, 4, 256); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
+const skyDay = skyTex('#6E9CC9', '#B9D3E6', '#E8EEF0'), skyEve = skyTex('#1F2A44', '#6B5D78', '#D79A6B'), skyNight = skyTex('#0B1020', '#1C2440', '#3A3550');
+scene.background = skyDay;
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 400);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.49; controls.minDistance = 2; controls.maxDistance = 120;
+
+const hemi = new THREE.HemisphereLight('#E4EEFA', '#8C7F6A', 0.7); scene.add(hemi);
+const sun = new THREE.DirectionalLight('#FFF3DF', 2.3); sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 140 });
+sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.03; sun.target.position.set(6, 0, 10); scene.add(sun, sun.target);
+const neutral = new THREE.AmbientLight('#FFFFFF', 0); scene.add(neutral);   // even light when the sun is switched off
+
+/* ---------- procedural textures (greyscale; material colour tints them) ---------- */
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647, (seed - 1) / 2147483646);
+function tex(w, h, tileW, tileH, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / tileW, 1 / tileH); t.anisotropy = 8; return t; }
+function noise(g, w, h, n, a, sz = 2) { for (let i = 0; i < n; i++) { const v = Math.floor(rnd() * 255); g.fillStyle = `rgba(${v},${v},${v},${a})`; g.fillRect(rnd() * w, rnd() * h, sz, sz); } }
+const T = {
+  wood: tex(600, 600, 0.6, 0.6, (g, w, h) => { g.fillStyle = '#202020'; g.fillRect(0, 0, w, h); seed = 3;
+    for (let i = 0; i < 10; i++) { const x = i * 60, b = 225 + Math.floor(rnd() * 30); g.fillStyle = `rgb(${b},${b},${b})`; g.fillRect(x, 0, 50, h);
+      for (let k = 0; k < 9; k++) { g.strokeStyle = `rgba(90,90,90,${0.05 + rnd() * 0.08})`; g.lineWidth = 1; g.beginPath(); const gx = x + 3 + rnd() * 44; g.moveTo(gx, 0); g.bezierCurveTo(gx + 3, h * 0.3, gx - 3, h * 0.6, gx + 1, h); g.stroke(); }
+      g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x + 48, 0, 2, h); g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(x, 0, 2, h); } }),
+  panel: tex(500, 1000, 1.25, 2.5, (g, w, h) => { g.fillStyle = '#F2F2F2'; g.fillRect(0, 0, w, h); seed = 5; noise(g, w, h, 9000, 0.05, 2); noise(g, w, h, 600, 0.04, 6);
+    }),
+  roof: tex(256, 256, 0.84, 0.84, (g, w, h) => { g.fillStyle = '#F0F0F0'; g.fillRect(0, 0, w, h); seed = 9; noise(g, w, h, 3000, 0.05, 2);
+    const d = (cx, cy) => { g.beginPath(); g.moveTo(cx, cy - 128); g.lineTo(cx + 128, cy); g.lineTo(cx, cy + 128); g.lineTo(cx - 128, cy); g.closePath(); };
+    g.strokeStyle = 'rgba(40,40,40,.55)'; g.lineWidth = 3; [[128, 0], [0, 128], [256, 128], [128, 256], [128, 128]].forEach(([x, y]) => { d(x, y); g.stroke(); });
+    g.fillStyle = 'rgba(0,0,0,.07)'; [[128, 128]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x - 128, y); g.lineTo(x, y + 128); g.lineTo(x + 128, y); g.lineTo(x, y + 112); g.closePath(); g.fill(); }); }),
+  soffit: tex(352, 352, 0.352, 0.352, (g, w, h) => { g.fillStyle = '#2A2A2A'; g.fillRect(0, 0, w, h); seed = 13;
+    for (let i = 0; i < 4; i++) { const b = 225 + Math.floor(rnd() * 28); g.fillStyle = `rgb(${b},${b},${b})`; g.fillRect(i * 88, 0, 80, h); for (let k = 0; k < 6; k++) { g.fillStyle = 'rgba(80,80,80,.07)'; g.fillRect(i * 88 + rnd() * 78, 0, 1, h); } } }),
+  concrete: tex(512, 512, 2.4, 1.2, (g, w, h) => { g.fillStyle = '#EDEDED'; g.fillRect(0, 0, w, h); seed = 17; noise(g, w, h, 14000, 0.06, 2); noise(g, w, h, 300, 0.05, 14);
+    g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(0, 0, w, 2); g.fillRect(0, 0, 2, h); for (let i = 0; i < 12; i++) { g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); g.arc(rnd() * w, rnd() * h, 1.5, 0, 7); g.fill(); } }),
+  terrazzo: tex(512, 512, 1.2, 1.2, (g, w, h) => { g.fillStyle = '#EDEBE6'; g.fillRect(0, 0, w, h); seed = 21; const cs = ['#B9B2A6', '#8E877C', '#FFFFFF', '#CFC7BA', '#A39A8C'];
+    for (let i = 0; i < 2600; i++) { g.fillStyle = cs[Math.floor(rnd() * cs.length)]; const r = 0.6 + rnd() * rnd() * 3.2; g.beginPath(); g.arc(rnd() * w, rnd() * h, r, 0, 7); g.fill(); } }),
+  grass: tex(512, 512, 2.2, 2.2, (g, w, h) => { g.fillStyle = '#D8D8D8'; g.fillRect(0, 0, w, h); seed = 25;
+    for (let i = 0; i < 26000; i++) { const v = 150 + Math.floor(rnd() * 105); g.strokeStyle = `rgba(${v},${v},${v},.55)`; g.lineWidth = 1; const x = rnd() * w, y = rnd() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - .5) * 3, y - 3 - rnd() * 5); g.stroke(); } }),
+  green: tex(256, 256, 1, 1, (g, w, h) => { g.fillStyle = '#C8C8C8'; g.fillRect(0, 0, w, h); seed = 29;
+    for (let i = 0; i < 2200; i++) { const v = 120 + Math.floor(rnd() * 135); g.fillStyle = `rgb(${v},${Math.min(255, v + 10)},${v - 20})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 1 + rnd() * 3.5, 0, 7); g.fill(); } }),
+  gravel: tex(256, 256, 0.6, 0.6, (g, w, h) => { g.fillStyle = '#D9D9D9'; g.fillRect(0, 0, w, h); seed = 31;
+    for (let i = 0; i < 2500; i++) { const v = 140 + Math.floor(rnd() * 115); g.fillStyle = `rgb(${v},${v},${v})`; g.beginPath(); g.ellipse(rnd() * w, rnd() * h, 1.5 + rnd() * 2.5, 1 + rnd() * 2, rnd() * 3, 0, 7); g.fill(); } }),
+  asphalt: tex(256, 256, 1, 1, (g, w, h) => { g.fillStyle = '#7A7A7A'; g.fillRect(0, 0, w, h); seed = 33; noise(g, w, h, 8000, 0.25, 2); }),
+  slats: tex(64, 64, 1, 0.08, (g, w, h) => { g.fillStyle = '#E8E8E8'; g.fillRect(0, 0, w, h); g.fillStyle = '#9A9A9A'; g.fillRect(0, 54, w, 10); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, w, 6); }),
+  perf: tex(64, 64, 0.06, 0.06, (g, w, h) => { g.fillStyle = '#F2F2F2'; g.fillRect(0, 0, w, h); g.fillStyle = '#2A2A2A'; g.beginPath(); g.arc(32, 32, 13, 0, 7); g.fill(); })
+};
+
+/* ---------- colour palette with presets (all editable in the menu) ---------- */
+const PALETTE = [
+  { k: 'wood', n: 'Lesena fasada', d: 'nadstropje in kolesarnica · termično modificiran bor, letve 5 cm z 1 cm reže (PZI)', def: '#8F8376', p: [['Termo bor, naraven', '#9C7552'], ['Sivo patiniran', '#8F8376'], ['Svetlo siv', '#B5AEA4'], ['Grafitni', '#4E4842'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'panelTop', n: 'Plošče Swisspearl, zgoraj', d: 'zatrepa in venec nadstrešnice · v PZI npr. Carat Crystal 8010 ali Nobilis Crystal 124', def: '#D8D6D1', p: [['Bela', '#ECEBE7'], ['Svetlo siva', '#D8D6D1'], ['Topla siva', '#BEB8AE'], ['Antracit', '#57595C'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'panel', n: 'Plošče Swisspearl, spodaj', d: 'stranice pritličja in venec med etažama', def: '#D8D6D1', p: [['Bela', '#ECEBE7'], ['Svetlo siva', '#D8D6D1'], ['Topla siva', '#BEB8AE'], ['Antracit', '#57595C'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'roof', n: 'Kritina', d: 'drobna vlaknocementna kritina v karo vzorcu', def: '#C9C6C0', p: [['Svetlo siva', '#C9C6C0'], ['Bela siva', '#E1DFDA'], ['Srednje siva', '#8E8D8A'], ['Antracit', '#505255']] },
+  { k: 'flash', n: 'Pločevina', d: 'obrobe, sleme, dimnik · v barvi kritine', def: '#C4C1BB', p: [['Kot kritina', '#C4C1BB'], ['Srebrna', '#B7B9BB'], ['Antracit', '#4A4C4F'], ['Črna', '#272727'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'frame', n: 'Okenski okvirji', d: 'macesen z lazuro (popis mizarskih del)', def: '#B58A5C', p: [['Macesen', '#B58A5C'], ['Svetel les', '#CDAA7C'], ['Siva', '#8E8B86'], ['Antracit', '#3F4043'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'blind', n: 'Žaluzije', d: 'zunanje alu žaluzije, barvo potrdi arhitekt', def: '#8F8C87', p: [['Siva', '#8F8C87'], ['Srebrna', '#B9BBBD'], ['Bež', '#C7B9A3'], ['Antracit', '#46484A'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'fin', n: 'Leseni morali', d: 'pritličje jug: vogalni zasloni, pari pred stebrički, slopi; stebri nadstrešnice', def: '#8A7764', p: [['Kot fasada', '#8F8376'], ['Topel les', '#8A7764'], ['Svetel', '#B39B7F'], ['Temen', '#4A3F36'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'soffit', n: 'Lesen napušč in stropi', d: 'spodnja stran strehe, terasa, nadstrešnica', def: '#A58A69', p: [['Bor, naraven', '#A58A69'], ['Kot fasada', '#8F8376'], ['Svetel', '#C9B497'], ['Bel lazur', '#E2DBCF'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'door', n: 'Vhodna vrata', d: 'masivni les', def: '#C29A68', p: [['Macesen', '#C29A68'], ['Hrast', '#A9814F'], ['Kot fasada', '#8F8376'], ['Antracit', '#3F4043'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'concrete', n: 'Vidni beton', d: 'oporni zidovi, stopnice, uta', def: '#BCB7AE', p: [['Svetel', '#C9C5BD'], ['Naraven', '#BCB7AE'], ['Topel', '#B9AE9E'], ['Temen', '#8F8A82'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'terrazzo', n: 'Teraco in dvorišče', d: 'brušen teraco beton, štokan beton', def: '#D2CABD', p: [['Peščen', '#D2CABD'], ['Svetlo siv', '#CFCDC8'], ['Topel', '#C9B9A2'], ['Siv', '#A8A49C'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'rail', n: 'Ograja terase', d: 'ploščati kovinski stebrički in ročaj, višina 1,0 m (PZI)', def: '#8C8178', p: [['Kot v PZI', '#8C8178'], ['Antracit', '#3B3734'], ['Kot okvirji', '#B58A5C'], ['Kot fasada', '#8F8376'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'metal', n: 'Kovina', d: 'stebri nadstrešnice, odtoki', def: '#3B3734', p: [['Antracit', '#3B3734'], ['Črna', '#1F1F1F'], ['Kot okvirji', '#B58A5C'], ['Inox', '#AEB2B5'], ['Srednje siva', '#8E8D8A']] },
+  { k: 'greenroof', n: 'Zelena streha', d: 'ekstenzivna ozelenitev nadstrešnice in ute', def: '#8E9B5E', p: [['Zelena', '#8E9B5E'], ['Sedum rdečkast', '#9D8A63'], ['Suha', '#B3A777']] },
+  { k: 'grass', n: 'Trava', d: '', def: '#7FA04E', p: [['Poletna', '#7FA04E'], ['Pomladna', '#94B85A'], ['Pozna', '#A5A26A']] }
+];
+const SKEY = 'hisaG.exteriorColours.v1';
+let saved = {}; try { saved = JSON.parse(localStorage.getItem(SKEY) || '{}') || {}; } catch (e) { saved = {}; }
+const col = {}; PALETTE.forEach(p => col[p.k] = saved[p.k] || p.def);
+
+const S = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.85, metalness: 0 }, o));
+const mat = {
+  wood: S(col.wood, { map: T.wood, roughness: 0.8 }),
+  panel: S(col.panel, { map: T.panel, roughness: 0.75 }),
+  panelTop: S(col.panelTop, { map: T.panel, roughness: 0.75 }),
+  perf: S(col.panelTop, { map: T.perf, roughness: 0.75 }),
+  roof: S(col.roof, { map: T.roof, roughness: 0.9 }),
+  flash: S(col.flash, { roughness: 0.5, metalness: 0.3 }),
+  frame: S(col.frame, { roughness: 0.6 }),
+  blind: S(col.blind, { map: T.slats, roughness: 0.5, metalness: 0.4, side: THREE.DoubleSide }),
+  fin: S(col.fin, { map: T.wood, roughness: 0.75 }),
+  soffit: S(col.soffit, { map: T.soffit, roughness: 0.8 }),
+  door: S(col.door, { roughness: 0.6 }),
+  concrete: S(col.concrete, { map: T.concrete, roughness: 0.92 }),
+  terrazzo: S(col.terrazzo, { map: T.terrazzo, roughness: 0.6 }),
+  metal: S(col.metal, { roughness: 0.4, metalness: 0.7 }),
+  rail: S(col.rail, { roughness: 0.5, metalness: 0.4 }),
+  greenroof: S(col.greenroof, { map: T.green, roughness: 1 }),
+  grass: S(col.grass, { map: T.grass, roughness: 1 }),
+  gravel: S('#BDB6AA', { map: T.gravel, roughness: 1 }),
+  asphalt: S('#5C5B5A', { map: T.asphalt, roughness: 0.95 }),
+  dark: S('#2B2826', { roughness: 0.7 }),
+  gutter: S('#1E1D1C', { roughness: 0.6 }),
+  joint: S('#3A3937', { roughness: 0.8 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: '#AFC4CA', metalness: 0, roughness: 0.04, transparent: true, opacity: 0.3, envMapIntensity: 1.4, depthWrite: false, side: THREE.DoubleSide }),
+  inWall: S('#EFE9E0', { side: THREE.BackSide, roughness: 0.95 }), inFloor: S('#C8A47A', { side: THREE.BackSide }), inFloorGF: S('#CDB596', { side: THREE.BackSide }), inCeil: S('#F6F3EE', { side: THREE.BackSide }),
+  fire: S('#3A2F28', { roughness: 0.9 }), leaf: [S('#5E7D3A', { flatShading: true }), S('#6F8F42', { flatShading: true }), S('#4F6C33', { flatShading: true }), S('#7C9A4C', { flatShading: true })], bark: S('#8B8378', { roughness: 0.9 }), ivy: S('#3F5F2C', { flatShading: true })
+};
+const LINK = { panelTop: ['panelTop', 'perf'], fin: ['fin'] };
+Object.values(mat).flat().forEach(m => { if (m.isMeshStandardMaterial && !m.isMeshPhysicalMaterial) m.envMapIntensity = 0.45; });
+
+/* ---------- geometry helpers: plan x → X, plan y (south +) → Z, height → Y ---------- */
+const root = new THREE.Group(); scene.add(root);
+const site = new THREE.Group(); scene.add(site);
+const trees = new THREE.Group(); site.add(trees);
+const carport = new THREE.Group(); scene.add(carport);
+function worldBox(w, h, d) { const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+  for (let i = 0; i < uv.count; i++) { const f = Math.floor(i / 4); const [su, sv] = f < 2 ? [d, h] : f < 4 ? [w, d] : [w, h]; uv.setXY(i, uv.getX(i) * su, uv.getY(i) * sv); } return g; }
+function B(x0, x1, z0, z1, y0, y1, m, parent = root, shadow = true) {
+  if (x1 - x0 <= 0 || y1 - y0 <= 0 || z1 - z0 <= 0) return null;
+  const mesh = new THREE.Mesh(worldBox(x1 - x0, y1 - y0, z1 - z0), m); mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+  const tr = Array.isArray(m) ? false : m.transparent; mesh.castShadow = shadow && !tr; mesh.receiveShadow = !tr; parent.add(mesh); return mesh; }
+function Cyl(x, z, y0, y1, r, m, r2 = r, parent = root, seg = 24) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r2, y1 - y0, seg), m); mesh.position.set(x, (y0 + y1) / 2, z); mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh; }
+
+/* ---------- levels from PZI (±0.00 = 354.30 m n.v.) ---------- */
+const VB = 2.65, VT = 3.12, UF = 3.15, SOF = 5.88, RIDGE = 9.76, TAN = Math.tan(38 * Math.PI / 180), RY = 3.84;
+const roofTop = y => RIDGE - Math.abs(y - RY) * TAN;
+
+/* ---------- terrain ---------- */
+const lerp = (a, b, t) => a + (b - a) * t, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), sstep = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+function G(y) { const P = [[10.2, -0.05], [19.0, -2.95], [20.6, -3.55], [24.5, -5.25], [28, -6.0], [40, -7.5]];
+  if (y <= P[0][0]) return P[0][1]; for (let i = 1; i < P.length; i++) if (y <= P[i][0]) return lerp(P[i - 1][1], P[i][1], (y - P[i - 1][0]) / (P[i][0] - P[i - 1][0])); return P[P.length - 1][1]; }
+const stairH = y => -0.02 - 3.72 * clamp((y - 10.2) / 10.3, 0, 1);
+function Hout(x, y) {
+  if (y < -0.26) { const d = Math.max(0, -6.0 - y); return 3.17 + d * 0.12 + (d > 0 ? Math.max(0, -x) * 0.02 : 0); }
+  if (y <= 8.45) {
+    if (x < -3.6) return Math.max(G(y), 3.17 - 0.33 * Math.max(0, y));
+    if (x < -0.22) return y < 4.8 ? 3.15 : lerp(3.15, -0.02, clamp((y - 4.8) / 4.6, 0, 1));
+    if (x > 16.4) { const ins = y < 2.45 ? 3.17 : lerp(3.17, -0.05, (y - 2.45) / 6); const bell = sstep(0, 3, y) * (1 - sstep(7, 9.5, y)); return ins - 1.3 * bell; }  // retaining wall 3 holds the own plot: neighbour side lower, like wall 4
+    if (x > 13.33) return y < 2.45 ? 3.17 : lerp(3.17, -0.05, (y - 2.45) / 6);
+    return -0.05;
+  }
+  let h = G(y) + (y > 10.2 ? clamp((6 - x) * 0.02, -0.25, 0.25) * sstep(10.2, 14, y) : 0);
+  if (x < -3.6 && y < 12) h = Math.max(h, 3.17 - 0.33 * y);
+  if (x > 16.4 && y < 10.5) h -= 1.3 * (1 - sstep(7, 10.5, y));
+  if (y < 10.2 && x > -0.22 && x < 14.3) h = -0.05;
+  // long garden stair
+  if (y > 10.0 && y < 20.6) { const dx = Math.abs(x - 0.35); if (dx < 1.5) h = lerp(Math.min(h, stairH(y) - 0.35), h, sstep(0.75, 1.5, dx)); }
+  // fire pit platform
+  const fr = Math.hypot(x - 12.2, y - 15.7); if (fr < 3.6) h = lerp(G(15.7) - 0.02, h, sstep(2.4, 3.6, fr));
+  // sunken lawn, stair landing, gravel yard
+  if (x >= -5.0 && x <= 4.0 && y >= 20.75 && y <= 24.25) h = -4.07;
+  if (x > 4.0 && x < 5.85 && y >= 20.75 && y <= 24.5) h = Math.min(h, -4.07);
+  if (x >= 7.75 && x <= 16.25 && y >= 20.75 && y <= 24.5) h = -5.25;
+  if (y > 24.5 && x > -5.25 && x < 16.25) h = Math.min(h, lerp(-5.25, -6.0, clamp((y - 24.5) / 3.5, 0, 1)));
+  return h;
+}
+function H(x, y) { // inside the house footprint, reuse the value at the nearest wall so no step shows
+  if (x > -3.45 && x < 16.25 && y > -6.4 && y < -0.26) return 3.10;
+  if (x > -3.45 && x < -0.22 && y >= -0.26 && y < 4.76) return 3.08;
+  if (x >= 7.70 && x <= 16.25 && y >= 20.8 && y <= 24.5) return -5.32;
+  if (x > -0.22 && x < 13.33 && y > -0.26 && y < 8.0) {
+    if (y < 0.9) return 3.17;   // buried north part; the step stays behind the interior back wall at y 1.0
+    const dW = x + 0.22, dE = 13.33 - x, dS = 8.0 - y, m = Math.min(dW, dE, dS);
+    if (m > 0.55) return -0.05;
+    return m === dW ? Hout(-0.3, y) : m === dE ? Hout(13.4, y) : Hout(x, 8.1);
+  }
+  return Hout(x, y);
+}
+{ const X0 = -14, X1 = 28, Y0 = -16, Y1 = 34, st = 0.25, nx = Math.round((X1 - X0) / st), ny = Math.round((Y1 - Y0) / st);
+  const g = new THREE.PlaneGeometry(X1 - X0, Y1 - Y0, nx, ny); g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i) + (X0 + X1) / 2, y = p.getZ(i) + (Y0 + Y1) / 2; p.setXYZ(i, x, H(x, y), y); uv.setXY(i, x, -y); }
+  g.computeVertexNormals(); const m = new THREE.Mesh(g, mat.grass); m.receiveShadow = true; site.add(m); }
+
+/* ---------- house: ground floor ---------- */
+B(-0.22, 0.08, -0.26, 8.0, -0.4, VB, mat.panel); B(13.03, 13.33, -0.26, 8.0, -0.4, VB, mat.panel); B(-0.22, 13.33, -0.26, 0.10, -0.4, VB, mat.concrete);
+/* south openings O1, O2, O3 (PZI sheme stavbnega pohištva, tloris pritličja): parapet 0.00, height 2.65, timber frames */
+B(-0.22, 0.904, 7.74, 7.99, 0, VB, mat.dark); B(12.874, 13.33, 7.74, 7.99, 0, VB, mat.dark);          // closed corners behind the slatted screens
+B(4.474, 4.724, 7.74, 7.99, 0, VB, mat.dark); B(9.554, 9.804, 7.74, 7.99, 0, VB, mat.dark);           // wall piers between the openings
+const GZ0 = 7.94, GZ1 = 7.99;
+const pane = (x0, x1) => B(x0, x1, GZ0 + 0.02, GZ1 - 0.01, 0.05, VB - 0.05, mat.glass);
+const gfr = (x0, x1) => B(x0, x1, GZ0, GZ1, 0, VB, mat.frame);
+function sash(x0, x1, hingeLeft) { // turn/tilt door leaf (krilno/ventus), 1.00 wide
+  pane(x0, x1); const t = 0.075; B(x0, x1, GZ0 - 0.01, GZ1, 0.05, 0.05 + t, mat.frame); B(x0, x1, GZ0 - 0.01, GZ1, VB - 0.05 - t, VB - 0.05, mat.frame);
+  B(x0, x0 + t, GZ0 - 0.01, GZ1, 0.05, VB - 0.05, mat.frame); B(x1 - t, x1, GZ0 - 0.01, GZ1, 0.05, VB - 0.05, mat.frame);
+  const hx = hingeLeft ? x1 - 0.045 : x0 + 0.035; B(hx, hx + 0.012, GZ1, GZ1 + 0.05, 1.02, 1.17, mat.metal); }
+function opening(x0, x1, parts) { // parts: [width, type] from west; type 'f' fixed, 's' sash, 'p' 0.17 post, 'm' thin mullion
+  B(x0, x1, GZ0, GZ1, 0, 0.05, mat.frame); B(x0, x1, GZ0, GZ1, VB - 0.05, VB, mat.frame); gfr(x0, x0 + 0.05); gfr(x1 - 0.05, x1);
+  let x = x0; parts.forEach(([w, t, h]) => { const a = x, b = x + w; if (t === 'f') pane(a, b); else if (t === 's') sash(a, b, h); else gfr(a, b); x = b; }); }
+opening(0.904, 4.474, [[0.05, 'p'], [2.36, 'f'], [0.17, 'p'], [0.97, 's', false], [0.02, 'p']]);                       // O1 3.57 × 2.65
+opening(4.724, 9.554, [[0.99, 's', true], [0.17, 'p'], [1.92, 'f'], [0.03, 'm'], [1.67, 'f'], [0.05, 'p']]); // O2 4.83 × 2.65
+opening(9.804, 12.874, [[1.01, 's', true], [0.17, 'p'], [1.84, 'f'], [0.05, 'p']]);                      // O3 3.07 × 2.65
+/* timber fins (lepljenec) exactly as in the ground-floor plan: 51/7 full depth, 15/7 on the outer line */
+const fin = (x, d) => B(x, x + 0.07, d > 0.3 ? 7.99 : 8.345, 8.50, 0, VB, mat.fin);
+fin(-0.236, 0.51); for (let i = 0; i < 9; i++) fin(-0.126 + i * 0.11, 0.15); fin(0.864, 0.51);   // SW corner screen
+[3.314, 3.414, 5.714, 5.814, 10.814, 10.914].forEach(x => fin(x, 0.51));  // pairs of 51/7 fins in front of the 0.17 posts
+[[4.454, 4.564, 4.674], [9.534, 9.644, 9.754]].forEach(([a, m, c]) => { fin(a, 0.51); fin(m, 0.15); fin(c, 0.51); }); // piers
+fin(12.824, 0.51); [12.939, 13.054, 13.169].forEach(x => fin(x, 0.15)); fin(13.284, 0.51);  // SE corner screen
+/* interior hints visible through the glazing */
+B(0.10, 13.0, 1.0, 7.90, 0.0, 2.62, [mat.inWall, mat.inWall, mat.inCeil, mat.inFloorGF, mat.inWall, mat.inWall], root, false);
+[4.474, 9.554].forEach(x => B(x, x + 0.25, 4.4, 7.74, 0, 2.62, mat.inWall, root, false));
+/* venec between floors: Swisspearl box 0.54 deep, flush with the ends of the timber fins, ALU cap with drip, slot for the ground-floor blinds (PZI detajl Fasadni pas 1) */
+const VZ0 = 2.65, VZ1 = 3.10;
+B(-0.27, 13.41, 7.96, 8.54, VZ0, VZ1, mat.panel); B(-0.27, -0.17, 4.88, 8.54, VZ0, VZ1, mat.panel); B(13.33, 13.41, 2.44, 8.54, VZ0, VZ1, mat.panel);
+B(-0.30, 13.44, 7.96, 8.57, VZ1, VZ1 + 0.03, mat.flash); B(-0.30, 13.44, 8.54, 8.57, VZ1 - 0.04, VZ1, mat.flash);
+B(-0.30, -0.22, 4.88, 8.57, VZ1, VZ1 + 0.03, mat.flash); B(-0.30, -0.27, 4.88, 8.57, VZ1 - 0.04, VZ1, mat.flash);
+B(13.33, 13.44, 2.44, 8.57, VZ1, VZ1 + 0.03, mat.flash); B(13.41, 13.44, 2.44, 8.57, VZ1 - 0.04, VZ1, mat.flash);
+[[0.904, 4.474], [4.724, 9.554], [9.804, 12.874]].forEach(([a, b]) => B(a, b, 8.03, 8.13, VZ0 - 0.004, VZ0, mat.dark));
+B(-0.22, 13.33, -0.26, 8.0, VB, VT, mat.concrete);
+/* panel joints (8 mm shadow gaps) exactly as on the PZI facades */
+const J = (x0, x1, z0, z1, y0, y1) => B(x0, x1, z0, z1, y0, y1, mat.joint, root, false);
+[0.90, 3.29, 5.85, 8.38, 10.93].forEach(x => J(x - 0.004, x + 0.004, 8.54, 8.546, VZ0, VZ1));
+J(-0.276, -0.27, 6.986, 6.994, VZ0, VZ1); J(13.41, 13.416, 5.476, 5.484, VZ0, VZ1);
+[5.36, 5.90, 6.95, 7.98].forEach(y => J(-0.226, -0.22, y - 0.004, y + 0.004, -0.4, VZ0));
+[2.98, 4.23, 5.48, 6.73, 7.98].forEach(y => J(13.33, 13.336, y - 0.004, y + 0.004, -0.4, VZ0));
+/* Zu1 terrazzo walk along the south glazing */
+B(-0.22, 14.3, 8.0, 10.2, -0.35, -0.02, mat.terrazzo);
+
+/* ---------- house: upper floor ---------- */
+B(-0.22, 4.23, 4.65, 8.50, VT, UF, mat.terrazzo); B(-0.22, 0.73, -0.26, 4.65, VT, UF, mat.terrazzo);
+const W = (x0, x1, z0, z1, y0 = UF, y1 = SOF) => B(x0, x1, z0, z1, y0, y1, mat.wood);
+function glass(x0, x1, z0, z1, y0, y1, frames = []) { B(x0, x1, z0, z1, y0, y1, mat.glass);
+  const alongX = x1 - x0 > z1 - z0, t = 0.06;
+  if (alongX) { B(x0, x1, z0 - 0.01, z1 + 0.01, y0, y0 + t, mat.frame); B(x0, x1, z0 - 0.01, z1 + 0.01, y1 - t, y1, mat.frame); [x0, x1 - t, ...frames.map(f => f - t / 2)].forEach(f => B(f, f + t, z0 - 0.01, z1 + 0.01, y0, y1, mat.frame)); }
+  else { B(x0 - 0.01, x1 + 0.01, z0, z1, y0, y0 + t, mat.frame); B(x0 - 0.01, x1 + 0.01, z0, z1, y1 - t, y1, mat.frame); [z0, z1 - t, ...frames.map(f => f - t / 2)].forEach(f => B(x0 - 0.01, x1 + 0.01, f, f + t, y0, y1, mat.frame)); } }
+/* north wall: kitchen window, entrance door + side glazing */
+W(0.73, 2.43, -0.26, 0.10); W(2.43, 4.48, -0.26, 0.10, UF, 4.10); W(2.43, 4.48, -0.26, 0.10, 5.10); glass(2.43, 4.48, -0.24, -0.20, 4.10, 5.10, [3.455]);
+W(4.48, 7.27, -0.26, 0.10); B(7.27, 9.13, -0.26, 0.10, 5.70, SOF, mat.wood);
+B(7.27, 8.19, -0.28, -0.22, 3.20, 5.70, mat.door); B(7.33, 7.36, -0.33, -0.28, 4.10, 5.10, mat.metal); glass(8.19, 9.13, -0.24, -0.20, 3.20, 5.70);
+W(9.13, 13.38, -0.26, 0.10);
+/* east wall: WC window, side door, living room window */
+const E0 = 13.03, E1 = 13.38;
+W(E0, E1, -0.26, 0.14); W(E0, E1, 0.14, 2.19, UF, 4.95); W(E0, E1, 0.14, 2.19, 5.65); glass(E1 - 0.04, E1, 0.14, 2.19, 4.95, 5.65);
+W(E0, E1, 2.19, 2.43); W(E0, E1, 2.43, 3.31, 5.65); glass(E1 - 0.05, E1 - 0.01, 2.43, 3.31, 3.20, 5.65);
+W(E0, E1, 3.31, 6.64); glass(E1 - 0.05, E1 - 0.01, 6.64, 7.89, 3.20, SOF); W(E0, E1, 7.89, 8.0);
+/* west: kitchen glazing, wall stub, terrace */
+W(0.73, 1.03, -0.26, 0.74); glass(0.95, 1.0, 0.74, 3.32, UF, SOF, [2.03]); W(0.73, 1.23, 3.32, 4.65);
+glass(1.23, 4.23, 4.64, 4.69, UF, SOF, [2.73]); W(4.23, 4.73, 4.40, 6.64); B(4.46, 4.51, 6.64, 7.97, UF, SOF, mat.glass);   // frameless corner: hidden fixed profiles, glass meets glass
+/* south: full glazing of the living area */
+B(4.46, 13.28, 7.95, 7.99, UF, SOF, mat.glass); [6.77, 8.81, 10.85].forEach(x => B(x - 0.004, x + 0.004, 7.95, 7.99, UF, SOF, mat.joint, root, false)); // panoramic glazing, profiles hidden in floor and soffit B(13.28, 13.38, 7.88, 8.0, UF, SOF, mat.wood);
+/* interior hints */
+B(1.02, 13.0, 0.12, 4.62, 3.18, 5.85, [mat.inWall, mat.inWall, mat.inCeil, mat.inFloor, mat.inWall, mat.inWall], root, false);
+B(4.53, 13.0, 4.62, 7.92, 3.18, 5.85, [mat.inWall, mat.inWall, mat.inCeil, mat.inFloor, mat.inWall, mat.inWall], root, false);
+/* terrace railing and corner post */
+/* terrace railing per PZI facades: flat posts ~1.0 m apart, flat top rail, no infill, height 1.0 m */
+function railing(pts, y) { const pw = 0.06, ph = 1.0;
+  pts.forEach(([x, z]) => B(x - pw / 2, x + pw / 2, z - 0.02, z + 0.02, y, y + ph - 0.05, mat.rail));
+  const [a, b] = [pts[0], pts[pts.length - 1]], alongX = Math.abs(b[0] - a[0]) > Math.abs(b[1] - a[1]);
+  if (alongX) B(Math.min(a[0], b[0]) - 0.05, Math.max(a[0], b[0]) + 0.05, a[1] - 0.04, a[1] + 0.04, y + ph - 0.05, y + ph, mat.rail);
+  else B(a[0] - 0.04, a[0] + 0.04, Math.min(a[1], b[1]) - 0.05, Math.max(a[1], b[1]) + 0.05, y + ph - 0.05, y + ph, mat.rail); }
+railing([[-0.18, 8.47], [0.13, 8.47], [1.13, 8.47], [2.13, 8.47], [3.13, 8.47], [4.18, 8.47]], UF);
+railing([[-0.18, 4.05], [-0.18, 5.05], [-0.18, 6.05], [-0.18, 7.05], [-0.18, 8.04], [-0.18, 8.47]], UF);
+
+/* ---------- soffits, roof with hidden box gutter, gables (PZI detajl D1, M 1:10) ---------- */
+const TIP_S = 8.75, TIP_N = -1.07, SB = 5.86;   // eave tips (plan y) and underside of the eave soffit
+B(-0.22, 4.48, 4.65, 8.0, SB, SOF + 0.08, mat.soffit); B(-0.22, 0.73, -0.26, 4.65, SB, SOF + 0.08, mat.soffit);
+B(-0.22, 13.33, 8.0, TIP_S, SB, SB + 0.06, mat.soffit); B(-0.22, 7.0, TIP_N, -0.26, SB, SB + 0.06, mat.soffit);
+function roofSlab(x0, x1, yA, yB, sign, t = 0.28, lift = 0, m = [mat.flash, mat.flash, mat.roof, mat.soffit, mat.flash, mat.flash]) { // yA near ridge, yB lower end; sign +1 south, −1 north
+  const run = Math.abs(yB - yA), a = 38 * Math.PI / 180, L = run / Math.cos(a);
+  const mesh = new THREE.Mesh(worldBox(x1 - x0, t, L), m), ym = (yA + yB) / 2, hm = roofTop(ym) + lift;
+  mesh.rotation.x = sign * a; mesh.position.set((x0 + x1) / 2, hm - Math.cos(a) * t / 2, ym - sign * Math.sin(a) * t / 2);
+  mesh.castShadow = mesh.receiveShadow = true; root.add(mesh); return mesh; }
+function prism(pts, x0, x1, m) { const sh = new THREE.Shape(); pts.forEach(([y, z], i) => i ? sh.lineTo(y, z) : sh.moveTo(y, z));
+  const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: x1 - x0, bevelEnabled: false }), m); mesh.rotation.y = -Math.PI / 2; mesh.position.x = x1;
+  mesh.castShadow = mesh.receiveShadow = true; root.add(mesh); return mesh; }
+/* tiles end 0.53 m behind the eave tip; between them a 20 cm hidden box gutter */
+roofSlab(-0.22, 13.33, RY - 0.12, TIP_S - 0.53, 1); roofSlab(-0.22, 7.0, RY + 0.12, TIP_N + 0.53, -1); roofSlab(7.0, 13.33, RY + 0.12, -0.42, -1);
+B(-0.22, 13.33, RY - 0.12, RY + 0.12, RIDGE - 0.03, RIDGE + 0.05, mat.flash);
+/* roof edge nose (venec na strehi): ALU-clad wedge in the roof plane, 6 cm sharp front edge, with the box gutter (žlota) behind it */
+prism([[TIP_S - 0.33, SB], [TIP_S, SB], [TIP_S, roofTop(TIP_S)], [TIP_S - 0.33, roofTop(TIP_S - 0.33)]], -0.22, 13.33, mat.flash);
+B(-0.22, 13.33, TIP_S - 0.53, TIP_S - 0.33, SB, 5.97, mat.gutter); B(-0.22, 13.33, TIP_S - 0.55, TIP_S - 0.53, SB, roofTop(TIP_S - 0.53) - 0.06, mat.gutter);
+prism([[TIP_N, SB], [TIP_N + 0.33, SB], [TIP_N + 0.33, roofTop(TIP_N + 0.33)], [TIP_N, roofTop(TIP_N)]], -0.22, 7.0, mat.flash);
+B(-0.22, 7.0, TIP_N + 0.33, TIP_N + 0.53, SB, 5.97, mat.gutter); B(-0.22, 7.0, TIP_N + 0.53, TIP_N + 0.55, SB, roofTop(TIP_N + 0.53) - 0.06, mat.gutter);
+/* gables: Swisspearl panels 1.25 m, vertical joints, horizontal joint at +8.78, perforated vent triangle under the ridge */
+function gable(xOut, dir) {
+  prism([[TIP_N, SB], [TIP_S, SB], [TIP_S, roofTop(TIP_S)], [RY, RIDGE], [TIP_N, roofTop(TIP_N)]], dir < 0 ? xOut : xOut - 0.04, dir < 0 ? xOut + 0.04 : xOut, mat.panelTop);
+  const jx0 = dir < 0 ? xOut - 0.005 : xOut, jx1 = dir < 0 ? xOut : xOut + 0.005;
+  for (let k = -3; k <= 3; k++) { const yj = RY + k * 1.25; J(jx0, jx1, yj - 0.004, yj + 0.004, SB, k === 0 ? 8.78 : roofTop(yj) - 0.01); }
+  J(jx0, jx1, RY - 1.25, RY + 1.25, 8.776, 8.784);
+  const p = new THREE.Shape(), f = dir < 0 ? 1 : -1; p.moveTo(f * 3.18, 8.85); p.lineTo(f * 4.50, 8.85); p.lineTo(f * RY, 9.43); p.lineTo(f * 3.18, 8.85);
+  const pm = new THREE.Mesh(new THREE.ShapeGeometry(p), mat.perf); pm.rotation.y = dir < 0 ? -Math.PI / 2 : Math.PI / 2; pm.position.x = xOut + dir * 0.006; root.add(pm);
+  /* flashing cap along the gable edges */
+  roofSlab(dir < 0 ? xOut - 0.02 : xOut - 0.06, dir < 0 ? xOut + 0.06 : xOut + 0.02, RY, TIP_S, 1, 0.03, 0.02, mat.flash);
+  roofSlab(dir < 0 ? xOut - 0.02 : xOut - 0.06, dir < 0 ? xOut + 0.06 : xOut + 0.02, RY, TIP_N, -1, 0.03, 0.02, mat.flash); }
+gable(-0.26, -1); gable(13.37, 1);
+B(-0.22, 13.33, TIP_N + 0.55, TIP_S - 0.55, SOF, SOF + 0.02, mat.concrete);
+B(12.34, 12.83, 4.78, 5.23, 8.2, 10.05, mat.flash); B(12.30, 12.87, 4.74, 5.27, 10.05, 10.11, mat.flash); B(12.45, 12.72, 4.90, 5.11, 10.11, 10.30, mat.flash);
+
+/* ---------- blinds (cassettes hidden; lowered by the slider) ---------- */
+const blinds = [];
+function blind(x0, x1, z0, z1, y0, y1) { const alongX = x1 - x0 > z1 - z0, L = alongX ? x1 - x0 : z1 - z0;
+  const g = new THREE.PlaneGeometry(L, 1); const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * L, uv.getY(i));
+  const m = new THREE.Mesh(g, mat.blind); if (!alongX) m.rotation.y = Math.PI / 2; m.position.set((x0 + x1) / 2, y1, (z0 + z1) / 2); m.castShadow = true; m.visible = false; root.add(m); blinds.push({ m, y0, y1 }); }
+[[0.904, 4.474], [4.724, 9.554], [9.804, 12.874]].forEach(([a, b]) => blind(a, b, 8.08, 8.08, 0.02, VB - 0.02)); blind(4.56, 13.28, 8.03, 8.03, UF, SOF - 0.02); blind(1.23, 4.23, 4.72, 4.72, UF, SOF - 0.02);
+blind(0.90, 0.90, 0.74, 3.32, UF, SOF - 0.02); blind(4.40, 4.40, 6.64, 7.92, UF, SOF - 0.02); blind(13.43, 13.43, 6.64, 7.89, UF, SOF - 0.02); blind(13.43, 13.43, 2.43, 3.31, 3.2, 5.65); blind(13.43, 13.43, 0.14, 2.19, 4.95, 5.65);
+function setBlinds(f) { blinds.forEach(b => { const h = (b.y1 - b.y0) * f; b.m.visible = f > 0.01; b.m.scale.y = Math.max(0.001, h); b.m.position.y = b.y1 - h / 2; b.m.material.map.repeat.set(1, 1 / 0.08); }); }
+
+/* ---------- carport with bike and bin store ---------- */
+const CT = 6.31, CB = 5.89;
+B(7.0, 15.75, -3.8, -0.26, CB, CT, [mat.panelTop, mat.panelTop, mat.greenroof, mat.soffit, mat.panelTop, mat.panelTop], carport);
+B(13.38, 15.75, -0.26, 2.45, CB, CT, [mat.panelTop, mat.panelTop, mat.greenroof, mat.soffit, mat.panelTop, mat.panelTop], carport);
+B(7.0, 14.38, -3.8, -0.26, 3.10, 3.17, mat.terrazzo, carport); B(13.38, 14.38, -0.26, 2.45, 3.10, 3.17, mat.terrazzo, carport);
+B(14.38, 15.75, -3.8, 2.45, 3.17, CB, mat.wood, carport);
+/* sliding slatted doors of the bike and bin store (passage side), steel frame 40/40 */
+[2.43, 0.0, -2.45, -2.75, -3.78].forEach(z => B(14.34, 14.38, z - 0.02, z + 0.02, 3.17, CB, mat.metal, carport));
+[0.02, 0.56, 1.10, 1.64, 2.18, 2.70].forEach(h => B(14.34, 14.38, -3.8, 2.45, 3.17 + h - 0.02, 3.17 + h + 0.02, mat.metal, carport));
+/* carport fascia joints (PZI fasade) */
+[12.89, 9.84].forEach(x => B(x - 0.004, x + 0.004, -3.806, -3.8, CB, CT, mat.joint, carport, false));
+[0.05, -2.35].forEach(y => B(15.75, 15.756, y - 0.004, y + 0.004, CB, CT, mat.joint, carport, false));
+B(6.994, 7.0, -1.304, -1.296, CB, CT, mat.joint, carport, false);
+for (let i = 0; i < 14; i++) { const x = 10.48 + i * 0.285; B(x, x + 0.12, -3.75, -3.55, 3.17, CB, mat.fin, carport); }
+[[7.05, -3.75], [7.05, -0.42]].forEach(([x, z]) => B(x, x + 0.1, z, z + 0.1, 3.17, CB, mat.metal, carport));
+[13.50, 13.80, 14.10].forEach(x => B(x, x + 0.07, 2.25, 2.45, 3.17, CB, mat.fin, carport));
+
+/* ---------- north yard, west walkway, amphitheatre steps ---------- */
+B(-3.45, 16.25, -6.4, -0.26, 2.9, 3.17, mat.terrazzo, site);
+B(-3.45, -0.22, -0.26, 4.76, 2.9, UF, mat.terrazzo, site);
+for (let i = 0; i < 16; i++) { const top = 0.185 * (i + 1); B(-3.45, -2.25, 9.4 - 0.27 * (i + 1), 9.4 - 0.27 * i, top - 0.8, top, mat.concrete, site); }
+B(-3.45, -2.25, -0.26, 5.08, 2.4, UF, mat.concrete, site);
+for (let i = 0; i < 8; i++) { const top = 0.35 * (i + 1); B(-2.25, -0.22, 9.4 - 0.58 * (i + 1), 9.4 - 0.58 * i, top - 0.8, top, mat.concrete, site); }
+/* retaining walls 4 (west) and 3 (east) */
+{ for (let i = 0; i < 72; i++) { const z0 = -0.3 + i * 0.12, z1 = z0 + 0.12, ins = Hout(-1, (z0 + z1) / 2), out = Hout(-4, (z0 + z1) / 2); B(-3.75, -3.45, z0, z1, Math.min(ins, out) - 0.6, Math.max(ins, out) + 0.05, mat.concrete, site); }
+  for (let i = 0; i < 100; i++) { const z0 = -3.8 + i * 0.12, z1 = z0 + 0.12, ins = Hout(15, (z0 + z1) / 2), out = Hout(17, (z0 + z1) / 2); B(16.25, 16.55, z0, z1, Math.min(ins, out) - 0.6, Math.max(ins, out) + 0.05, mat.concrete, site); } }
+/* long garden stair down to the sunken lawn */
+for (let i = 0; i < 21; i++) { const z0 = 10.2 + i * 0.49, top = stairH(z0 + 0.49); B(-0.25, 0.95, z0, z0 + 0.49, top - 0.9, top, mat.concrete, site);
+  const ch = stairH(z0) + 0.06; B(-0.40, -0.25, z0, z0 + 0.49, top - 0.9, ch, mat.concrete, site); B(0.95, 1.10, z0, z0 + 0.49, top - 0.9, ch, mat.concrete, site); }
+/* sunken lawn with walls, steps, uta with green roof, gravel yard */
+B(-5.25, -5.0, 20.5, 24.5, -5.8, -3.6, mat.concrete, site); B(4.0, 4.25, 20.5, 24.5, -5.8, -3.75, mat.concrete, site);
+B(-5.25, -0.25, 20.5, 20.75, -4.6, -3.40, mat.concrete, site); B(0.95, 4.25, 20.5, 20.75, -4.6, -3.40, mat.concrete, site);
+B(-5.25, 4.25, 24.25, 24.5, -5.8, -3.75, mat.concrete, site);
+B(-0.25, 0.95, 20.5, 20.75, -4.6, -3.74, mat.concrete, site); B(-0.25, 0.95, 20.75, 21.1, -4.6, -3.90, mat.concrete, site);
+B(4.25, 5.85, 20.75, 22.9, -4.8, -4.07, mat.concrete, site);
+for (let i = 0; i < 6; i++) { const top = -4.07 - 0.168 * (i + 1); B(4.25, 5.85, 22.9 + i * 0.3, 23.2 + i * 0.3, top - 0.5, top, mat.concrete, site); }
+B(5.85, 7.70, 19.2, 24.2, -5.25, -2.95, [mat.concrete, mat.concrete, mat.greenroof, mat.concrete, mat.concrete, mat.concrete], site);
+B(7.70, 7.74, 20.0, 23.4, -5.25, -3.25, mat.wood, site);
+B(7.75, 16.25, 20.5, 20.8, -5.8, -3.75, mat.concrete, site);
+B(7.70, 16.25, 20.8, 24.5, -5.4, -5.25, mat.gravel, site);
+Cyl(13.4, 22.6, -5.25, -5.21, 0.45, mat.concrete, 0.45, site);
+/* fire pit with curved bench */
+{ const fh = G(15.7) - 0.02; Cyl(12.2, 15.7, fh - 0.05, fh + 0.01, 2.3, mat.gravel, 2.3, site, 48);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.09, 10, 36), mat.concrete); ring.rotation.x = Math.PI / 2; ring.position.set(12.2, fh + 0.32, 15.7); ring.castShadow = true; site.add(ring);
+  Cyl(12.2, 15.7, fh, fh + 0.30, 0.56, mat.concrete, 0.58, site, 36); Cyl(12.2, 15.7, fh + 0.29, fh + 0.31, 0.40, mat.fire, 0.40, site, 36);
+  const sh = new THREE.Shape(); const a0 = 0.35 * Math.PI, a1 = 1.65 * Math.PI; sh.absarc(0, 0, 1.95, a0, a1, false); sh.absarc(0, 0, 1.50, a1, a0, true);
+  const bench = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.42, bevelEnabled: false }), mat.concrete); bench.rotation.x = -Math.PI / 2; bench.position.set(12.2, fh, 15.7); bench.rotation.z = 0.25; bench.castShadow = bench.receiveShadow = true; site.add(bench); }
+/* roads: north access road and southern lane */
+function road(pts, width, parent = site) { const pos = [], idx = [], uv = [];
+  pts.forEach(([x, y], i) => { const [xa, ya] = pts[Math.max(0, i - 1)], [xb, yb] = pts[Math.min(pts.length - 1, i + 1)]; let nx = -(yb - ya), ny = xb - xa; const l = Math.hypot(nx, ny); nx /= l; ny /= l;
+    const qx = x + nx * width, qy = y + ny * width; pos.push(x, H(x, y) + 0.04, y, qx, H(qx, qy) + 0.04, qy); uv.push(x, y, qx, qy); if (i) { const b = (i - 1) * 2; idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2); } });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat.asphalt); m.material.side = THREE.DoubleSide; m.receiveShadow = true; parent.add(m); }
+road([[-14, -12.2], [-4.4, -10.4], [1.07, -8.34], [17.14, -5.37], [28, -3.4]], -4.5);
+road([[-14, 28.4], [-5.4, 27.8], [17.43, 26.04], [28, 25.2]], 5.0);
+/* parcel boundary (toggle) */
+const parcel = new THREE.Group(); parcel.visible = false; scene.add(parcel);
+{ const P = [[-4.4, -10.4], [1.07, -8.34], [17.14, -5.37], [17.43, 26.04], [-5.4, 27.77], [-4.4, -10.4]], pts = [];
+  for (let i = 0; i < P.length - 1; i++) { const [a, b] = [P[i], P[i + 1]], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.5);
+    for (let k = 0; k <= n; k++) { const x = lerp(a[0], b[0], k / n), y = lerp(a[1], b[1], k / n); pts.push(new THREE.Vector3(x, H(x, y) + 0.08, y)); } }
+  const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color: '#7A3C8C', dashSize: 0.6, gapSize: 0.35 })); l.computeLineDistances(); parcel.add(l); }
+
+/* ---------- trees and ivy ---------- */
+function tree(x, y, s, lean = 0) { const base = H(x, y), g = new THREE.Group(); g.position.set(x, base, y); trees.add(g);
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.07 * s, 0.13 * s, 2.6 * s, 8), mat.bark); trunk.position.y = 1.3 * s; trunk.rotation.z = lean; trunk.castShadow = true; g.add(trunk);
+  seed = Math.abs(Math.floor(x * 100 + y * 7)) % 9973 + 11;
+  for (let b = 0; b < 3; b++) { const br = new THREE.Mesh(new THREE.CylinderGeometry(0.03 * s, 0.06 * s, 1.6 * s, 6), mat.bark); const a = rnd() * 6.28;
+    br.position.set(Math.cos(a) * 0.35 * s, 2.7 * s, Math.sin(a) * 0.35 * s); br.rotation.set(Math.sin(a) * 0.6, 0, -Math.cos(a) * 0.6); br.castShadow = true; g.add(br); }
+  for (let i = 0; i < 20; i++) { const r = (0.5 + rnd() * 0.5) * s, a = rnd() * 6.28, d = rnd() * 1.7 * s;
+    const f = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 2), mat.leaf[Math.floor(rnd() * 4)]); f.position.set(Math.cos(a) * d, (3.2 + rnd() * 1.6) * s, Math.sin(a) * d); f.scale.y = 0.8; f.castShadow = true; f.receiveShadow = true; g.add(f); } }
+tree(-7.8, 1.5, 1.35, 0.06); tree(14.7, 12.3, 0.95, -0.08); tree(13.9, 16.9, 0.9, 0.1); tree(10.9, 17.9, 0.85, -0.05); tree(-11.5, 20.5, 1.1);
+function ivy(x0, z0, x1, z1, n) { for (let i = 0; i < n; i++) { const t = rnd(), x = lerp(x0, x1, t), z = lerp(z0, z1, t), h = Math.max(Hout(x - 0.4, z), Hout(x + 0.4, z));
+  const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22 + rnd() * 0.22, 0), mat.ivy); m.position.set(x + (rnd() - .5) * 0.3, h - rnd() * 0.5, z); m.scale.set(0.6, 1.4, 1); m.castShadow = true; site.add(m); } }
+seed = 101; ivy(-3.8, 0.5, -3.8, 7.5, 26); ivy(16.6, -2, 16.6, 7, 22); ivy(9, 20.45, 15.8, 20.45, 18);
+
+/* ---------- colour menu ---------- */
+const mats = document.getElementById('mats');
+function applyColour(k, v) { col[k] = v; (LINK[k] || [k]).forEach(n => mat[n] && mat[n].color.set(v)); const inp = document.getElementById('c_' + k); if (inp && inp.value.toLowerCase() !== v.toLowerCase()) inp.value = v;
+  try { localStorage.setItem(SKEY, JSON.stringify(col)); } catch (e) {} }
+PALETTE.forEach(p => { const d = document.createElement('div'); d.className = 'mat';
+  d.innerHTML = `<div class="mrow"><b>${p.n}</b><input type="color" id="c_${p.k}" value="${col[p.k]}" aria-label="${p.n}"></div>${p.d ? `<div class="mnote">${p.d}</div>` : ''}<div class="chips"></div>`;
+  const chips = d.querySelector('.chips'); p.p.forEach(([n, v]) => { const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.innerHTML = `<i style="background:${v}"></i>${n}`; c.onclick = () => applyColour(p.k, v); chips.appendChild(c); });
+  d.querySelector('input').addEventListener('input', e => applyColour(p.k, e.target.value)); mats.appendChild(d); });
+document.getElementById('resetBtn').onclick = () => PALETTE.forEach(p => applyColour(p.k, p.def));
+document.getElementById('copyBtn').onclick = async e => { const t = 'Hiša G, izbor barv zunanjosti\n' + PALETTE.map(p => `${p.n}: ${col[p.k].toUpperCase()}`).join('\n');
+  try { await navigator.clipboard.writeText(t); e.target.textContent = 'Kopirano'; } catch (err) { prompt('Kopiraj besedilo:', t); } setTimeout(() => e.target.textContent = 'Kopiraj izbor barv', 1800); };
+document.getElementById('minBtn').onclick = e => { const p = document.getElementById('panel'); p.classList.toggle('min'); e.target.textContent = p.classList.contains('min') ? 'Meni' : 'Skrij'; };
+
+/* ---------- toggles, sun, blinds ---------- */
+document.getElementById('tSite').onchange = e => site.visible = e.target.checked;
+document.getElementById('tTrees').onchange = e => trees.visible = e.target.checked;
+document.getElementById('tParcel').onchange = e => parcel.visible = e.target.checked;
+document.getElementById('tCarport').onchange = e => carport.visible = e.target.checked;
+const glowMats = [mat.inWall, mat.inCeil, mat.inFloor, mat.inFloorGF];
+function setHour(h) { const az = (h - 12.5) * 15 * Math.PI / 180, el = Math.max(-0.1, Math.sin(Math.PI * (h - 5.8) / 14.4)) * 62 * Math.PI / 180;
+  sun.position.set(6 - Math.sin(az) * Math.cos(el) * 60, Math.sin(el) * 60 + 1, 10 + Math.cos(az) * Math.cos(el) * 60);
+  const day = sstep(0.02, 0.25, el), dusk = 1 - day; sun.intensity = 2.6 * day + 0.15; sun.color.set(day > 0.6 ? '#FFF3DF' : '#FFB070');
+  hemi.intensity = 0.25 + 0.6 * day; scene.background = el < 0.03 ? skyNight : day < 0.7 ? skyEve : skyDay;
+  glowMats.forEach(m => { m.emissive.set('#FFB65C'); m.emissiveIntensity = dusk * 0.55; });
+  renderer.toneMappingExposure = 1.0 + dusk * 0.25;
+  const hh = Math.floor(h), mm = Math.round((h - hh) * 60); document.getElementById('hourV').textContent = `${hh}:${String(mm).padStart(2, '0')}`; }
+document.getElementById('hour').oninput = e => setHour(+e.target.value);
+/* sun off: neutral, shadow-free daylight so the material colours read as they are */
+document.getElementById('tSun').onchange = e => { const on = e.target.checked, hr = document.getElementById('hour'); hr.disabled = !on;
+  if (on) { sun.visible = true; neutral.intensity = 0; scene.environment = envTex; setHour(+hr.value); return; }
+  sun.visible = false; hemi.intensity = 0; neutral.intensity = 2.0; scene.environment = null;   // light only from all sides equally: roof, walls and soffits get identical light scene.background = skyDay; renderer.toneMappingExposure = 0.9;
+  glowMats.forEach(m => m.emissiveIntensity = 0); };
+document.getElementById('blind').oninput = e => { const v = +e.target.value; setBlinds(v / 100); document.getElementById('blindV').textContent = v === 0 ? 'dvignjene' : v + ' %'; };
+
+/* ---------- views ---------- */
+const VIEWS = {
+  'Jug (vrt)': { p: [2.5, 2.2, 41], t: [6.5, 0.4, 8] },
+  'Jugozahod': { p: [-16, 8, 22], t: [5.5, 2.6, 5] },
+  'Jugovzhod': { p: [25, 7, 21], t: [7, 2.8, 4] },
+  'Sever, vhod': { p: [9.5, 5.2, -15], t: [8.5, 4.3, -1] },
+  'Severozahod': { p: [-12, 9, -14], t: [5, 3.5, 2] },
+  'Terasa': { p: [2.4, 4.75, 5.6], t: [7.5, 3.4, 22] },
+  'Amfiteater': { p: [-6.8, 2.6, 14.5], t: [-1, 2.2, 5] },
+  'Detajl napušča': { p: [-2.6, 6.5, 12.2], t: [1.2, 5.9, 8.5] },
+  'Detajl venca': { p: [-2.4, 2.4, 11.4], t: [1.6, 2.7, 8.3] },
+  'Pritličje jug': { p: [6.55, 1.45, 22.5], t: [6.55, 1.35, 8.0] },
+  'Od zgoraj': { p: [6, 42, 30], t: [6, 0, 8] }
+};
+const vb = document.getElementById('views'); let anim = null;
+function go(name, instant) { const v = VIEWS[name]; [...vb.children].forEach(b => b.setAttribute('aria-pressed', b.textContent === name));
+  const to = { p: new THREE.Vector3(...v.p), t: new THREE.Vector3(...v.t) };
+  if (instant) { camera.position.copy(to.p); controls.target.copy(to.t); controls.update(); return; }
+  anim = { from: { p: camera.position.clone(), t: controls.target.clone() }, to, t0: performance.now(), d: 1000 }; }
+Object.keys(VIEWS).forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = () => go(n); vb.appendChild(b); });
+const hv = decodeURIComponent(location.hash.slice(1)); go(VIEWS[hv] ? hv : 'Jugozahod', true);
+const qh = new URLSearchParams(location.search).get('ura'); if (qh) document.getElementById('hour').value = qh; setHour(+document.getElementById('hour').value);
+const qb = new URLSearchParams(location.search).get('zaluzije'); if (qb) { document.getElementById('blind').value = qb; document.getElementById('blind').oninput({ target: { value: qb } }); }
+
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+renderer.setAnimationLoop(now => {
+  if (anim) { const k = Math.min(1, (now - anim.t0) / anim.d), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    camera.position.lerpVectors(anim.from.p, anim.to.p, e); controls.target.lerpVectors(anim.from.t, anim.to.t, e); if (k === 1) anim = null; }
+  controls.update(); renderer.render(scene, camera); });
+window.__ready = true;
+</script>
+</body>
+</html>

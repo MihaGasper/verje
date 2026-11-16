@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiša G · Ostrešje 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#DCE6EC;--panel:rgba(251,248,243,.95);--ink:#2E2925;--muted:#6E645A;--line:#DDD3C6;--accent:#B0703F;--warn:#A4471F;--chip:#EFE8DE}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1D1A17;--panel:rgba(38,34,30,.95);--ink:#EEE7DD;--muted:#B2A89C;--line:#3D3731;--accent:#D49A6A;--warn:#E58A62;--chip:#2E2925}}
+:root[data-theme="dark"]{--bg:#1D1A17;--panel:rgba(38,34,30,.95);--ink:#EEE7DD;--muted:#B2A89C;--line:#3D3731;--accent:#D49A6A;--warn:#E58A62;--chip:#2E2925}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif;overflow:hidden}
+#view{position:fixed;inset:0}
+.panel{position:fixed;top:16px;left:16px;width:360px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;backdrop-filter:blur(6px);z-index:3;box-sizing:border-box}
+.panel.min .body{display:none}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+h1{font:500 26px/1.1 "EB Garamond",Georgia,serif;margin:0 0 4px}
+h3{font:600 12px/1.3 Inter,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+button{font:inherit;color:inherit;background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 8px}
+.tabs button{font-size:12.5px}
+.tab{display:none}.tab.show{display:block}
+.layers label{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;font-size:13px}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.2);flex:none}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.row button{font-size:12.5px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.muted{color:var(--muted)}
+dl{margin:0;font-size:12.8px}
+dt{font-weight:600;margin-top:8px}
+dd{margin:2px 0 0 0;color:var(--ink)}
+ul,ol{margin:4px 0 0 0;padding-left:18px;font-size:12.8px}
+li{margin:4px 0}
+li.w::marker{color:var(--warn)}
+.flag{color:var(--warn);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:4px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right}
+tfoot td{font-weight:600}
+.info{position:fixed;right:16px;bottom:16px;width:300px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;z-index:3;box-sizing:border-box;font-size:13px}
+.info.hidden{display:none}
+.info b{display:block;font-size:14px;margin-bottom:4px}
+.info .x{float:right;border:0;background:none;padding:0 2px;font-size:16px;line-height:1}
+.hint{position:fixed;right:16px;top:16px;z-index:2;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+.lbl{font:500 11.5px/1.25 Inter,sans-serif;color:#2E2925;background:rgba(255,255,255,.86);border:1px solid rgba(0,0,0,.12);border-radius:4px;padding:2px 6px;white-space:nowrap;pointer-events:none}
+.lbl.ax{background:#fff;border-radius:50%;width:18px;height:18px;padding:0;display:flex;align-items:center;justify-content:center;font-weight:600}
+.lbl.cmp{background:none;border:0;font-weight:600;letter-spacing:.08em;color:#6E645A}
+.lbl.w{border-color:#A4471F;color:#A4471F}
+.lbl.d{border-color:#2F6FA3;color:#24557D}
+@media (max-width:640px){.panel{top:8px;left:8px;width:calc(100vw - 16px);max-height:52vh}.info{right:8px;bottom:8px;width:calc(100vw - 16px)}.hint{display:none}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="view"></div>
+<div class="hint">Vrti: levi klik · premik: desni klik · zoom: kolešček · klik na element = podatki</div>
+
+<aside class="panel" id="panel">
+  <div class="head">
+    <div>
+      <h1>Ostrešje · Hiša G</h1>
+      <p class="sub">3D model lesene strešne konstrukcije po PZI 160-22 (arhitektura 04.1.4, 04.1.5, prerezi 11, 22, AA) in načrtu gradbenih konstrukcij.</p>
+    </div>
+    <button id="min" title="Skrij / pokaži">–</button>
+  </div>
+  <div class="body">
+    <div class="tabs">
+      <button data-t="sloji" class="on">Sloji</button>
+      <button data-t="podatki">Podatki</button>
+      <button data-t="kos">Kosovnica</button>
+      <button data-t="vpr">Za sestanek</button>
+    </div>
+
+    <section class="tab show" id="t-sloji">
+      <h3>Pogled</h3>
+      <div class="row">
+        <button data-v="iso">3D</button>
+        <button data-v="jug">Jug</button>
+        <button data-v="sever">Sever</button>
+        <button data-v="vzhod">Vzhod</button>
+        <button data-v="zahod">Zahod</button>
+        <button data-v="zgoraj">Tloris</button>
+        <button data-v="znotraj">Podstrešje</button>
+        <button data-v="odtoki">Odtoki</button>
+      </div>
+      <h3>Prerez (prečno, pogled od vzhoda)</h3>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="cut"> Vklopi prerez pri X = <b id="cutv">2,91</b> m</label>
+      <input type="range" id="cutx" min="0" max="13.25" step="0.01" value="2.91">
+      <div class="row" style="margin-top:4px">
+        <button data-cut="2.91">Prerez 11</button>
+        <button data-cut="8.96">Prerez 22</button>
+        <button data-cut="12.76">Pri dimniku</button>
+      </div>
+      <h3>Sloji</h3>
+      <div class="layers" id="layers"></div>
+      <p class="muted" style="font-size:12px;margin-top:10px">X merjeno od zunanjega roba zahodnega zatrepnega zidu (0,00) proti vzhodu (13,25). Y od osi A (sever) proti jugu. Višine glede na ±0,00 = 354,30 m n.v.</p>
+    </section>
+
+    <section class="tab" id="t-podatki">
+      <dl>
+        <dt>Oblika</dt>
+        <dd>Simetrična dvokapnica, naklon <b>38°</b>, sleme V–Z (vzporedno s plastnicami). Hladna, neizolirana streha nad neizkoriščenim podstrešjem (32,68 m²).</dd>
+        <dt>Višine</dt>
+        <dd>Sleme (vrh kritine) <b>+9,75</b> · rob kapi / napušča <b>+5,88</b> · razlika 3,88 m. Vrh špirovca v slemenu ≈ +9,58.</dd>
+        <dt>Tloris</dt>
+        <dd>Konstrukcija 13,25 m (med zunanjima robovoma zatrepnih zidov) × 7,86 m (osi A–C). Sleme 3,83 m od osi A in 4,03 m od osi C. Strešina do roba kapi: S 6,30 m, J 6,33 m. Kritina na zatrepih ~5 cm čez fasado (brez previsa).</dd>
+        <dt>Škarniki (špirovci)</dt>
+        <dd><b>12/14 cm</b>, C24, osni razmak <b>86 cm</b> (statika dopušča e<sub>max</sub> 100 cm), <b>16 parov</b>. Brez slemenske lege – para se stikata v slemenu. Dolžina: S 5,30 m (tloris 4,19), J 5,47 m (tloris 4,31). Krajna para sta v ravnini zatrepov – nanju se priključi lesena zatrepna stena.</dd>
+        <dt>Vmesni legi</dt>
+        <dd><b>20/22 cm</b>, os B (Y 2,31) in Y 5,34 (1,515 m od slemena na vsako stran). Spodnji rob +8,02, zgornji +8,24. Dolžina 13,25 m – čez sohi na koncu do zunanjega roba lesenih zatrepov.</dd>
+        <dt>Sohe in ročice</dt>
+        <dd>4 sohe <b>20/20 cm</b> v oseh 2 (X 4,72) in 3 (X 9,80) + ročice (dimenzija ni podana). Alternativa: AB stebrički 25/25. Sohe stojijo na navzgor obrnjenih AB nosilcih 25/90 (vrh +6,95). Razponi leg po PZI: 4,47 / 5,08 / 3,19 m.<br><b>Dodano (ni v PZI):</b> po dve sohi 20/20 čisto na koncu, v ravnini lesenega zatrepa namesto zatrepnega zidu – zahod X 0,00–0,20 (na plošči +6,31), vzhod X 13,05–13,25 (na plošči +6,20). Vgrajeni sta v steno, nosita konca vmesnih leg. Ročica samo proti notranjosti; JV soha brez ročice (dimnik).</dd>
+        <dt>Kapni legi</dt>
+        <dd><b>20/22 cm</b> na risbah (opis/statika 20/20), v celoti na AB, sidranje z navojnimi palicami <b>M16 na ~2,0 m</b>.<br>Sever: Y −0,11…0,09, +6,19–6,41.<br>Jug je pri osi 2 (X≈4,85) <b>zamaknjena</b>: zahod Y 7,43–7,63 (+6,31–6,53, plošča nad teraso), vzhod Y 7,66–7,86 (+6,19–6,41).</dd>
+        <dt>Zatrepa</dt>
+        <dd><b>PZI (FZ3.1):</b> opeka Porotherm 25 S z AB vezmi. <b>Izvedba po želji investitorja:</b> lesena okvirna stena z OSB (v modelu predpostavka: stojke 8/12 na ~60 cm, prag 12/8, OSB/3 18 mm, ob zunanji strani krajnega škarnika). Pod koncema vmesnih leg sta v steno vgrajeni sohi 20/20, nad lego vložek do strešne linije.<br>
+        <b>Fasada po PZI:</b> mineralna volna NaturBoard Venti med horizontalnimi morali (zahod 6 cm, vzhod 12 cm) · črna folija Homeseal LDS 0.02 UV · alu tipska podkonstrukcija (zrak: zahod 4 cm, vzhod 13 cm) · <b>Swisspearl 8 mm</b> (Nobilis Crystal 124 ali Carat Crystal 8010), nevidno pritrjene.<br>
+        Razpored: navpični pasovi 1,25 m simetrično na sleme (robni 1,22 m), v sredini vodoravni stik 2,90 m nad kapjo, pod slemenom trikotna plošča 0,98 m s perforacijami za zračenje podstrešja. Spodnji rob +5,88; obloga z minimalnim »odkapom« pred fasado nadstropja.</dd>
+        <dt>Sestava S1 (13,5 cm, od zgoraj)</dt>
+        <dd>Swisspearl ravna kritina CH, karo/romb 40×40 (EP 400×400), svetlo siva (1,0) · letve 4/5 na 19 cm (4,0) · kontraletve 6/4 v oseh špirovcev, vijačene skozi folijo in deske (6,0 zračni sloj) · folija Knauf Homeseal LDS 0.04 FixPlus · polno podeskanje, smrekove deske (2,5).</dd>
+        <dt>Kritina po navodilih Swisspearl (Ravna kritina CH, EP 400×400)</dt>
+        <dd>Enojno pokrivanje, romb · min. naklon 18°, dopustni sneg ≤ 3,60 kN/m² (sk 1,60 ✓) · preklop 12 cm, <b>razmik letev 19 cm</b>, letve 5,3 m/m², 10,4 plošč in kljuk 4×125×29 na m² · začetne plošče RK 310×500 ZP.<br>
+        <b>Les:</b> letve min. <b>40×50 mm</b> C24 (špirovci do 0,9 m), vlaga ≤ 20 % · prezračevani sloj (kontraletve) min. <b>45 mm</b> (naklon &gt; 25°, špirovec 5–10 m).<br>
+        <b>Kap:</b> kapna deska 150 mm × debelina letev + podložna letvica 5×20 mm + perforirana odkapna pločevina, previs plošč 10 mm · <b>Sleme:</b> zračeno, ravne slemenske plošče 400×300/280 (6 parov/m'), slemenska deska 30 mm, letve v slemenu = debelina letvanja + 6 mm, slemenska pločevina, koničnost 20 mm, 200 cm²/m' · <b>Čelo:</b> vetrna obroba, robne plošče min. 100 mm · kap in čelo: 2 vrsti dodatno z lepenkarji 2,3×35.<br>
+        <b>Širina:</b> 27 plošč EP = pokrivna širina 13,73–13,81 m (model 13,73 m); zunanja mera med čelnima deskama = pokrivna širina − 5 cm.</dd>
+        <dt>Plošča pod ostrešjem (T3.1)</dt>
+        <dd>AB 15 cm (+6,05/+6,20; nad teraso 12 cm, +6,31) + parna zapora + 24 cm kamena volna DF + OSB 1,5 (pohodno). Nad ploščo mreža navzgor obrnjenih AB nosilcev 25/90.</dd>
+        <dt>Kap in odvodnjavanje</dt>
+        <dd>Skriti ležeči žlebovi v padcu 0,5 % (sever: zahodni del ~7 m; jug: cela dolžina), pred fasado, z lesenim »kljunom« in horizontalno leseno oblogo napušča na +5,88. Severna strešina v vzhodnem delu odvaja direktno na zeleno streho nadstrešnice – HI min. 40 cm nad ravno streho. Odtoki: SZ Ø125, JV Ø120 (tloris strehe Ø100).</dd>
+        <dt>Odtoki od žleba do kanalizacije (gumb »Odtoki«)</dt>
+        <dd>Vse vertikale so <b>skrite v fasadi</b> (PZI: »horizontalni in vertikalni odtoki so izvedeni skrito«).<br>
+        <b>SZ</b> – severni žleb (zahodni del) teče z obeh strani k iztoku pri X 2,37 → vertikala Ø120/125 v severni fasadi nadstropja → pod terenom +3,17 v peskolov PE4.<br>
+        <b>JV</b> – južni žleb teče v celoti proti vzhodu, iztok na JV vogalu (X 13,37, Y 8,29) → ~1,8 m pod napuščem v vzhodni fasadi do Y 6,53 → vertikala Ø100/120 skozi obe etaži → ~1,5 m pod terenom v PE2.<br>
+        <b>JZ</b> – terasa ST.2 (+3,15) → kanal → vertikala Ø100 v JZ vogalu pritličja → ~2,4 m pod terasno v PE1.<br>
+        <b>Nadstrešnica</b> (z njo vzhodni del severne strešine) – žleb ob severnem robu → vertikala Ø125/100 v vogalu AB stene → PE3.<br>
+        <b>Zunanja kanalizacija</b> (KP-137-26, sept. 2026): PVC DN160 – PE4 → RJ2 (12,0 m, 1 %); PE3 in lovilec olj → RJ2; RJ2 → RJ1 drča ob vzhodni fasadi (10,5 m); PE1 → RJ1 (12,6 m, 1 %) in PE2 → RJ1; RJ1 → <b>zadrževalnik 2,2 m³</b> z dušilko 1,6 l/s in prelivom → obstoječ meteorni odvodnik BC Ø200 (globino preveriti). Peskolovi Ø40: pokrov +3,10 (sever) oz. ±0,00 (jug), iztok 60 cm pod pokrovom.</dd>
+        <dt>Prebodi</dt>
+        <dd>Dimnik Schiedel UniPlus 25 (48×48, X 12,52–13,00, Y 4,76–5,24), nad streho obložen s pločevino v barvi kritine. Odduh WC Ø110 (X≈12,5, ob severni kapi). Izrez v plošči 70/110 za dvižne stopnice (X 9,38–10,48).</dd>
+        <dt>Obtežbe (statika)</dt>
+        <dd>Sneg A2, 355 m: s<sub>k</sub> 1,60 kN/m², s 1,28 kN/m² · veter v<sub>b0</sub> 20 m/s · stalna 1,05 kN/m² (vključno 0,18 kN/m² za sončno elektrarno) · les C24, razred uporabe 1.</dd>
+        <dt>Obveza izvajalca</dt>
+        <dd>Delavniško dokumentacijo lesene konstrukcije izdela izvajalec in jo pred izvedbo predloži projektantu gradbenih konstrukcij.</dd>
+      </dl>
+    </section>
+
+    <section class="tab" id="t-kos">
+      <p class="muted" style="font-size:12px;margin:0 0 6px">Izračunano iz modela (neto, brez odreza in rezerve). Ročice so predpostavka 12/12, 45°. Vključene so tudi 4 dodane sohe v ravnini zatrepov in lesena zatrepa (stojke, prag, OSB – predpostavka).</p>
+      <table id="kos"></table>
+      <h3>Za primerjavo – popis in ponudbe</h3>
+      <ul>
+        <li>Popis: lesena konstrukcija 112,7 m² tlorisa, poraba do 0,05 m³/m² (≈ 5,6 m³) – ujema se z modelom.</li>
+        <li>Letve, kontraletve, folija, deske: po 168,9 m² · čelne deske/obrobe 25,2 m · skriti žleb 20,7 m.</li>
+        <li>Mehle (6. 2. 2026): tesarska 10.811 € · krovsko-kleparska 20.046 €.</li>
+        <li>Ponudba »STREHA … Verje«: 19.281 € + 37.843 € (oder ni vštet).</li>
+        <li>Kritina: popis »RK 400×400 DP« (dvojno) · Mehle »EP romb RK 400×400« · Jerkovič »enojno, 40/40«. Prejeta navodila prodajalca so za Ravno kritino <b>AT</b> (drug sistem).</li>
+        <li>Jerkovič: tesarska 14.360 € (antiglivična zaščita ni v ceni, kontraletve 5/8) · krovsko-kleparska 32.482 € (žleb iz OSB + Rhepanol, ogrevanje ni v ceni, LORO Ø50 skrito v fasadi).</li>
+      </ul>
+    </section>
+
+    <section class="tab" id="t-vpr">
+      <p class="muted" style="font-size:12px;margin:0 0 4px">Neskladja v dokumentaciji in odprte točke, ki jih velja razčistiti s tesarjem.</p>
+      <ol>
+        <li class="w"><span class="flag">Dimnik ↔ les.</span> Dimnik (Y 4,76–5,24) se po tlorisu dotika južne vmesne lege (Y 5,24) in je ~1 cm od zadnjega škarnika. Z leseno zatrepno steno dimnik ni več ob opeki – JV soha je ~5 cm, stojke in OSB ~13 cm od njega. Preveri zahtevani odmik od gorljivih materialov po navodilih Schiedel in rešitev (zamik lege/dimnika, okvir, negorljiva izolacija).</li>
+        <li class="w"><span class="flag">Zaseke.</span> Špirovec je v prerezih narisan ~12 cm visok, predpisan je 12/14. Pri višinah leg z risb linija spodnjega roba špirovca seka lego približno po sredini → zaseka na zunanjem robu ~8–11 cm. Cilj ≤ ~h/3 (≈4,5 cm): kdo prilagodi višine leg ali poševno posname lego?</li>
+        <li class="w"><span class="flag">J kapna lega vzhod.</span> Na +6,19 je glede na linijo špirovca previsoka (zunanji rob ~16 cm nad spodnjim robom špirovca) → nižji prerez ali drugačno ležišče.</li>
+        <li class="w"><span class="flag">J soha v osi 3.</span> Pod njo na tlorisu ni navzgor obrnjenega AB nosilca – stoji na plošči 15 cm? Potrditev statika ali AB stebriček 25/25.</li>
+        <li class="w"><span class="flag">Dodane sohe v ravnini zatrepov (ni v PZI).</span> Namesto zatrepnega zidu nosijo konce vmesnih leg; vgrajene so v leseno steno, lega gre čez njih do zunanjega roba. Vse štiri stojijo na robu AB plošče (zahod 12 cm, vzhod 15 cm) – v prerezu AA je pod zatrepoma zasteklitev, ne zid, zato gre točkovna sila v rob plošče. JV soha je ~5 cm od dimnika in je brez ročice. Potrditev statika: prenos sile v ploščo, sidranje (jeklen čevelj).</li>
+        <li class="w"><span class="flag">Zatrepa iz OSB namesto opeke.</span> PZI predvideva Porotherm 25 S z AB vezmi (nosilna za konce leg, sodeluje pri potresni in vetrni togosti). Potrebna je potrditev statika: prerez in razmik stojk, debelina OSB, sidranje praga v AB ploščo, priključek na krajni škarnik.</li>
+        <li class="w"><span class="flag">Katera kritina → razmik letev.</span> PZI in ponudbi Mehle/Jerkovič: Ravna kritina CH, EP 400×400 (romb) → letve na <b>19 cm</b>. Popis: DP 400×400 → 15 cm. Prejeta navodila so za Ravno kritino AT (ED-L-RH 40/44 → 29,5 cm, DD-L-QU 40/40 → 16 cm). Statika računa letve na 30 cm. Pred letvanjem potrdi točno ploščo in pridobi shemo letvanja od dobavitelja.</li>
+        <li class="w"><span class="flag">Linijski snegolovi.</span> Za EP 400×400 zadoščajo samo točkovni snegolovi (10,4 kos/m²) le do sk 1,5 kN/m²; statika ima sk 1,60 → po navodilih Swisspearl so potrebni <b>tudi linijski snegolovi</b>. Ponudbe imajo le točkovne. Nosilci gredo nad špirovce (na kontraletve), pod peto dodatna letev, podložna pločevina 200 mm – tesar mora lego poznati pred letvanjem (zlasti nad teraso in vhodom).</li>
+        <li class="w"><span class="flag">Kap s skritim žlebom ≠ detajl prodajalca.</span> Navodila kažejo viseči žleb. Pri skritem žlebu je treba detajlirati dovod zraka v prezračevani sloj (ÖNORM: min. 120 cm²/m' dovoda in 160 cm²/m' odvoda; CH: odprtine ≥ 50 % prereza sloja), mrežico proti mrčesu ter iztok folije v žleb. Zračeno sleme da 200 cm²/m'.</li>
+        <li class="w"><span class="flag">Odtoki v fasadi – prostor.</span> Zračni sloj lesene fasade FZ2.1 je 3 + 3 cm, Swisspearl FZ1.2 4 cm – cev Ø100–125 vanj ne gre. Potreben je utor v toplotni izolaciji (MW / XPS) ali drugačna cev. Tesar mora pri podkonstrukciji fasade in kljunu predvideti potek, preboje in revizijo.</li>
+        <li class="w"><span class="flag">JV odtok – vmesni potek ni narisan.</span> Iztok žleba je na JV vogalu (Y 8,29), vertikala pa v vzhodni fasadi pri Y 6,53 (nad zasteklitvijo). Vmes je ~1,8 m skrite vodoravne cevi pod napuščem – detajl (padec, revizija, zmrzal) od arhitekta.</li>
+        <li>Kapna lega 20/22 (risbe) ali 20/20 (opis, statika)? Vmesna lega: risbe 20/22, statični izračun naslovljen 20/20.</li>
+        <li>Ročice: dimenzija, kot in spoj niso podani – predlog tesarja.</li>
+        <li>Vmesni legi 13,25 m (od zatrepa do zatrepa): kje je štos (nad soho)? Ali lepljen les GL24h v enem kosu?</li>
+        <li>Spoj škarnikov v slemenu (ni slemenske lege): preklop, čep, jeklene vezne pločevine? Kleščine? Vetrno povezje ni predvideno – je potrebno?</li>
+        <li>Fasada zatrepov: kdo izvede leseno steno in podkonstrukcijo (tesar) in kdo Swisspearl (fasader)? Polagalna shema po PZI, perforacije za zračenje po dogovoru z arhitektom.</li>
+        <li>Napušč: lesen »kljun« + skriti žleb + spodnja obloga – kdo izvede (tesar/klepar/fasader), material (LIP 27 mm/OSB), padec 0,5 %, ogrevanje žlebov.</li>
+        <li>Kontraletve: projekt 6/4, Jerkovič 5/8 – oboje izpolni Swisspearl min. 45 mm. Letve: min. 40×50 C24, vlaga ≤ 20 %. Kdo dobavi kapno desko 150×40, podložno letvico 5×20, slemensko desko 30 mm in letve v slemenu (tesar ali krovec)? Lega čelnih desk uskladiti s pokrivno širino 27 plošč (13,73–13,81 m).</li>
+        <li>Sončna elektrarna je v statiki upoštevana – nosilne kljuke vgraditi pred kritino?</li>
+        <li>Odtoki – premeri niso usklajeni: SZ Ø125 (ostrešje) / Ø120 (nadstropje); JV Ø100 (streha) / Ø120 (nadstropje, pritličje); nadstrešnica Ø125 / Ø100; popis fi 100; Jerkovič LORO Ø50 skrito v fasadi. Zunaj: arhitektura PE Ø110, komunala PVC160. Odduh Ø110 (popis Ø100).</li>
+        <li>Kam gre deževnica: arhitektura (2025) – zbiralnik deževnice s prelivom v ponikovalnico (strojne: vkopana cisterna); komunala (sept. 2026) – zadrževalnik 2,2 m³ z dušilko v obstoječ odvodnik BC Ø200. Uskladi, ali ostane cisterna za zalivanje.</li>
+        <li>Antiglivična zaščita, skobljanje in pleskanje vidnih delov (v ponudbi Jerkovič ni v ceni).</li>
+        <li>Dostop na podstrešje: opis navaja enkrat izvlečne stopnice v dnevnem prostoru, drugič zunanje zložljive stopnice ob kuhinji; tloris kaže izrez 70/110 pri osi 3.</li>
+        <li>Delavniški načrt lesene konstrukcije (zahteva statike): kdo in do kdaj; rok montaže glede na AB in nadstrešnico.</li>
+      </ol>
+    </section>
+  </div>
+</aside>
+
+<div id="info" class="info hidden"><button class="x" id="infox" aria-label="Zapri">×</button><div id="infoc"></div></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+// ---------- geometrija iz PZI (m) ----------
+const A = 38 * Math.PI / 180, T = Math.tan(A), C = Math.cos(A), S = Math.sin(A);
+const X0 = 6.625, YR = 3.825;          // sredina dolžine, sleme od osi A
+const ZT0 = 9.577;                     // vrh škarnika v slemenu
+const RH = 0.14, RB = 0.12;            // škarnik 12/14
+const ZCOV = ZT0 + 0.135 / C;          // vrh kritine v slemenu ≈ +9,75
+const zTop = d => ZT0 - T * d;
+const zCov = d => ZCOV - T * d;
+const zBot = d => ZT0 - RH / C - T * d;
+const dRaf = { '-1': 4.19, '1': 4.31 };     // tloris škarnika od slemena (S / J)
+const dDeck = { '-1': 4.24, '1': 4.375 };   // deske, kritina do fasade
+const RAFTERS = [0.180, 1.027, 1.897, 2.757, 3.617, 4.477, 5.337, 6.197, 7.057, 7.917, 8.777, 9.637, 10.497, 11.357, 12.217, 13.069];
+const VERGE = [-0.166, 13.565];   // ~4 cm čez fasado zatrepa (kot v PZI)
+const fmt = (v, n = 2) => v.toFixed(n).replace('.', ',');
+
+// ---------- scena ----------
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.localClippingEnabled = false;
+view.appendChild(renderer.domElement);
+const labelR = new CSS2DRenderer();
+labelR.setSize(innerWidth, innerHeight);
+Object.assign(labelR.domElement.style, { position: 'fixed', inset: '0', pointerEvents: 'none' });
+view.appendChild(labelR.domElement);
+
+const scene = new THREE.Scene();
+const setBg = () => { scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#DCE6EC'); };
+setBg(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setBg);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.05, 300);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 7.6, 0);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8170, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(9, 22, 14);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 60 });
+sun.shadow.bias = -0.0004;
+scene.add(sun);
+
+// ---------- materiali ----------
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, ...o });
+const M = {
+  rafter: mat(0xD2AA77), purlin: mat(0xB9884F), post: mat(0xA4733F), brace: mat(0xC28E57),
+  concrete: mat(0xBDBAB2), beam: mat(0xA9A69E),
+  stud: mat(0xCB9E68), osb: mat(0xD8B47C), mw: mat(0xE3CF7E, { transparent: true, opacity: 0.5 }), membrane: mat(0x1F2224),
+  alu: mat(0xA7ABAF, { roughness: 0.4, metalness: 0.5 }), panel: mat(0xCDD1D3, { roughness: 0.7 }), perf: mat(0x55595C),
+  board: mat(0xE0C89E), cbatten: mat(0xB48E5C), batten: mat(0xD7B585),
+  gutter: mat(0x4A4D50, { roughness: 0.5, metalness: 0.4 }), metal: mat(0x8E9396, { roughness: 0.45, metalness: 0.35 }),
+  soffit: mat(0xA87A4E), nose: mat(0xA9AEB1), chimney: mat(0x9DA2A6), hole: mat(0x2E2925),
+  ghost: mat(0xFFFFFF, { transparent: true, opacity: 0.12, depthWrite: false }), green: mat(0x7E9B68, { transparent: true, opacity: 0.55 }),
+  vent: mat(0x3B3F42, { roughness: 0.4, metalness: 0.3 }),
+  pipe: mat(0x2F6FA3, { roughness: 0.45, metalness: 0.2 }), pvc: mat(0xC06A2B, { roughness: 0.6 }), exist: mat(0x7D7A74),
+  shaft: mat(0x9A9893, { transparent: true, opacity: 0.7 }), lid: mat(0x55595C, { roughness: 0.5, metalness: 0.4 }),
+  zd: mat(0x6E9DBA, { transparent: true, opacity: 0.6 }),
+  ground: mat(0x8FA77A, { transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide })
+};
+// polni elementi naj bodo v prerezu videti polni
+['rafter', 'purlin', 'post', 'brace', 'concrete', 'beam', 'chimney', 'stud', 'osb', 'panel'].forEach(k => { M[k].side = THREE.DoubleSide; });
+// kritina – romb (karo) 40×40
+const tex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#B4B9BC'; g.fillRect(0, 0, 128, 128);
+  g.strokeStyle = '#8E9498'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(64, 0); g.lineTo(128, 64); g.lineTo(64, 128); g.lineTo(0, 64); g.closePath(); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+})();
+M.cover = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, transparent: true, opacity: 0.93 });
+
+// ---------- pomočniki ----------
+const layers = {};
+const pick = [];
+const L = (key) => (layers[key] ||= Object.assign(new THREE.Group(), { name: key }));
+const MSZ = new THREE.Matrix4().set(0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1);
+function add(layer, mesh, info) {
+  mesh.castShadow = mesh.receiveShadow = true;
+  if (info) { mesh.userData.info = info; pick.push(mesh); }
+  L(layer).add(mesh); return mesh;
+}
+// prizma: poligon [[s, Z]] (s = Y − sleme, jug +), izvlečen po X od xa do xb
+function prismX(pts, xa, xb, m) {
+  const shape = new THREE.Shape(pts.map(([s, z]) => new THREE.Vector2(-s, z)));
+  const g = new THREE.ExtrudeGeometry(shape, { depth: xb - xa, bevelEnabled: false });
+  g.applyMatrix4(MSZ);
+  const mesh = new THREE.Mesh(g, m); mesh.position.x = xa - X0; return mesh;
+}
+// kvader v koordinatah PZI: X, Y (od osi A), Z (višina)
+function box(xa, xb, ya, yb, za, zb, m) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(xb - xa, zb - za, yb - ya), m);
+  mesh.position.set((xa + xb) / 2 - X0, (za + zb) / 2, (ya + yb) / 2 - YR); return mesh;
+}
+// sloj vzporeden s strešino: d0..d1 tlorisno od slemena, t0..t1 pravokotno nad zgornjim robom škarnika
+function slope(side, d0, d1, t0, t1, xa, xb, m) {
+  const dc = (d0 + d1) / 2, tc = (t0 + t1) / 2, len = (d1 - d0) / C;
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(xb - xa, t1 - t0, len), m);
+  mesh.position.set((xa + xb) / 2 - X0, zTop(dc) + C * tc, side * dc + side * S * tc);
+  mesh.rotation.x = side * A; return mesh;
+}
+function label(text, X, Y, Z, cls = '', layer) {
+  const el = document.createElement('div'); el.className = 'lbl ' + cls; el.textContent = text;
+  const o = new CSS2DObject(el); o.position.set(X - X0, Z, Y - YR); o.userData.layer = layer; L('labels').add(o); return o;
+}
+const side = s => (s < 0 ? 'sever' : 'jug');
+
+// ---------- škarniki ----------
+const cut = { raf: [], pur: [], post: [], brace: [] };
+RAFTERS.forEach((x, i) => {
+  for (const sd of [-1, 1]) {
+    const de = dRaf[sd], hb = RH / C;
+    const pts = [[0, ZT0], [sd * de, zTop(de)], [sd * de, zTop(de) - hb], [0, ZT0 - hb]];
+    const len = de / C;
+    add('rafters', prismX(pts, x - RB / 2, x + RB / 2, M.rafter), {
+      t: `Škarnik ${i + 1}${sd < 0 ? 'S' : 'J'} · 12/14 cm`,
+      d: [`C24 smreka, strešina ${side(sd)}`, `os X = ${fmt(x, 3)} m`, `dolžina ${fmt(len)} m (tloris ${fmt(de)} m), poševna reza v slemenu in na kapi`,
+          i === 0 || i === 15 ? 'krajni škarnik – nanj se priključi lesena zatrepna stena' : 'podprt z vmesno in kapno lego']
+    });
+    cut.raf.push(len);
+  }
+});
+
+// ---------- lege ----------
+const purlins = [
+  { n: 'Vmesna lega – sever (os B)', x: [0, 13.249], y: [2.21, 2.41], z: [8.024, 8.244], note: 'podprta s sohami v oseh 2 in 3, na koncih s sohama v ravnini zatrepov; sega do zunanjega roba lesenega zatrepa' },
+  { n: 'Vmesna lega – jug', x: [0, 13.249], y: [5.24, 5.44], z: [8.024, 8.244], note: 'podprta s sohami v oseh 2 in 3, na koncih s sohama v ravnini zatrepov; sega do zunanjega roba lesenega zatrepa' },
+  { n: 'Kapna lega – sever', x: [0.12, 13.129], y: [-0.115, 0.085], z: [6.187, 6.407], note: 'na AB, sidrana z M16 na ~2,0 m' },
+  { n: 'Kapna lega – jug, zahodni del', x: [0.12, 4.85], y: [7.425, 7.625], z: [6.307, 6.527], note: 'na višji plošči nad teraso (+6,31); zamik pri osi 2' },
+  { n: 'Kapna lega – jug, vzhodni del', x: [4.60, 13.129], y: [7.655, 7.855], z: [6.188, 6.408], note: 'na plošči +6,19; zamik pri osi 2 – višina glede na linijo škarnika za preveriti' }
+];
+purlins.forEach(p => {
+  const len = p.x[1] - p.x[0];
+  add('purlins', box(p.x[0], p.x[1], p.y[0], p.y[1], p.z[0], p.z[1], M.purlin), {
+    t: p.n + ' · 20/22 cm', d: [`C24, dolžina ${fmt(len)} m`, `Y ${fmt(p.y[0])} … ${fmt(p.y[1])} m`, `spodaj +${fmt(p.z[0])}, zgoraj +${fmt(p.z[1])}`, p.note]
+  });
+  cut.pur.push([p.n, len]);
+});
+
+// ---------- sohe in ročice ----------
+// [X, Y, spodnji rob, smeri ročic, zatrep]; zadnje štiri so dodane v ravnini zatrepov namesto zidu (niso v PZI)
+const posts = [
+  [4.724, 2.31, 6.95], [9.804, 2.31, 6.95], [4.724, 5.34, 6.95], [9.804, 5.34, 6.20],
+  [0.10, 2.31, 6.31, [1], 'zahod'], [0.10, 5.34, 6.31, [1], 'zahod'], [13.149, 2.31, 6.20, [-1], 'vzhod'], [13.149, 5.34, 6.20, [], 'vzhod']
+];
+posts.forEach(([x, y, zb, dirs = [-1, 1], end], i) => {
+  const h = 8.024 - zb;
+  const d = [end ? `v ravnini ${end}nega zatrepa, X ${fmt(x - 0.1)}–${fmt(x + 0.1)} m, Y = ${fmt(y)} m` : `os ${x < 7 ? '2' : '3'}, Y = ${fmt(y)} m`, `višina ${fmt(h)} m (+${fmt(zb)} → +8,02)`,
+    end ? '⚠ stoji na robu AB plošče – v prerezu AA je pod zatrepom zasteklitev, ne zid (preveri statik)'
+      : zb > 6.9 ? 'stoji na navzgor obrnjenem AB nosilcu 25/90' : '⚠ pod njo ni navzgor obrnjenega AB nosilca – stoji na plošči (preveri)'];
+  if (end) d.push('dodano – ni v PZI, namesto zatrepnega zidu nosi konec vmesne lege', 'vgrajena v leseno zatrepno steno (OSB jo prekrije), spodaj jeklen čevelj sidran v AB',
+    dirs.length ? 'ročica samo proti notranjosti' : 'brez ročice – dimnik je ~5 cm stran (preveri odmik od lesa)');
+  if (!end) d.push('alternativa: AB stebriček 25/25');
+  add('posts', box(x - 0.1, x + 0.1, y - 0.1, y + 0.1, zb, 8.024, M.post), { t: `${end ? 'Dodana soha' : 'Soha'} ${i + 1} · 20/20 cm`, d });
+  cut.post.push(h);
+  for (const dir of dirs) {
+    const run = 0.6, len = Math.hypot(run, run);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(len, 0.12, 0.12), M.brace);
+    b.position.set(x + dir * (0.1 + run / 2) - X0, 8.024 - run / 2, y - YR);
+    b.rotation.z = dir * Math.PI / 4;
+    add('posts', b, { t: 'Ročica (predpostavka 12/12)', d: ['dimenzija in geometrija v PZI nista podani', `≈ 45°, dolžina ${fmt(len)} m`, 'skrajša razpon vmesne lege in zavetruje vzdolžno'] });
+    cut.brace.push(len);
+  }
+});
+
+// ---------- AB plošča, nosilci, zatrepi ----------
+add('concrete', box(0, 13.25, -0.125, 7.985, 6.05, 6.20, M.concrete), { t: 'AB plošča nad nadstropjem', d: ['d = 15 cm, zgoraj +6,20', 'nad njo T3.1: parna zapora + 24 cm kamena volna + OSB 1,5'] });
+add('concrete', box(0, 1.35, -0.11, 7.86, 6.19, 6.31, M.concrete), { t: 'AB plošča nad nadkritim prehodom/teraso', d: ['d = 12 cm, zgoraj +6,31 (skok v plošči)'] });
+add('concrete', box(1.35, 4.85, 4.39, 7.86, 6.19, 6.31, M.concrete), { t: 'AB plošča nad teraso', d: ['d = 12 cm, zgoraj +6,31 (skok v plošči)'] });
+[[0.25, 13.0, 2.185, 2.435, 'E–Z v osi B (pod severno vmesno lego)'], [1.10, 13.0, 6.385, 6.635, 'E–Z, južni'], [1.10, 1.35, 0.49, 6.635, 'S–J pri X 1,10'], [4.60, 4.85, 0.49, 7.86, 'S–J v osi 2']]
+  .forEach(([xa, xb, ya, yb, n]) => add('concrete', box(xa, xb, ya, yb, 6.05, 6.95, M.beam), { t: 'Navzgor obrnjen AB nosilec 25/90', d: [n, 'vrh +6,95 (obloga 10 cm kamena volna po popisu)'] }));
+add('concrete', box(9.38, 10.48, 2.55, 3.24, 6.20, 6.215, M.hole), { t: 'Izrez v AB plošči 70/110', d: ['za montažo dvižnih (izvlečnih) TI stopnic', 'velikost glede na izbrani model stopnic'] });
+// ---------- zatrepa: lesena okvirna stena z OSB + obešena fasada Swisspearl (FZ3.1) ----------
+// PZI: opeka Porotherm 25 S z AB vezmi; po želji investitorja lesena stena z OSB.
+// Stojke 8/12 na ≤ 62,5 cm, prag 12/8 in OSB 18 mm so predpostavka; sloji fasade so po PZI.
+cut.stud = []; cut.plate = []; let osbArea = 0, panelArea = 0;
+const area = pts => Math.abs(pts.reduce((a, [x1, y1], i) => { const [x2, y2] = pts[(i + 1) % pts.length]; return a + x1 * y2 - x2 * y1; }, 0)) / 2;
+const rafterLine = s => zTop(Math.abs(s));
+const capLine = s => zCov(Math.abs(s)) - 0.02;      // fasada konča pod čelno obrobo
+// poligon pasu med s0 in s1 od zb do strešne linije (s = Y − sleme)
+function profile(s0, s1, zb, top) {
+  const p = [[s0, zb], [s1, zb], [s1, Math.max(zb, top(s1))]];
+  if (s0 < 0 && s1 > 0) p.push([0, top(0)]);
+  p.push([s0, Math.max(zb, top(s0))]);
+  return p.filter((q, i) => { const r = p[(i + p.length - 1) % p.length]; return Math.hypot(q[0] - r[0], q[1] - r[1]) > 1e-4; });
+}
+const GABLES = [
+  // x = zunanja ravnina nosilne stene, out = smer navzven, mw/air = debelini po FZ3.1
+  { n: 'zahodni', out: -1, x: 0, zb: 6.31, tipN: -4.965, mw: 0.06, air: 0.04 },
+  { n: 'vzhodni', out: 1, x: 13.249, zb: 6.20, tipN: -4.24, mw: 0.12, air: 0.13 }
+];
+const sA = -3.935, sB = 4.035;                       // stena od Y −0,11 do 7,86
+for (const g of GABLES) {
+  const at = (a, b) => [Math.min(g.x + g.out * a, g.x + g.out * b), Math.max(g.x + g.out * a, g.x + g.out * b)];
+  const zp = g.zb + 0.08;
+  // sohi 20/20 pod koncema vmesnih leg sta vgrajeni v steno – prag in stojke so med njima
+  const P = [2.31 - YR, 5.34 - YR];
+  const bays = [[sA, P[0] - 0.1, true, false], [P[0] + 0.1, P[1] - 0.1, false, false], [P[1] + 0.1, sB, false, true]];
+  for (const [a, b, ea, eb] of bays) {
+    add('gables', box(...at(-0.12, 0), a + YR, b + YR, g.zb, zp, M.stud), { t: `Prag 12/8 – ${g.n} zatrep`, d: ['predpostavka', 'sidran v AB ploščo, pri sohah prekinjen', `dolžina ${fmt(b - a)} m`] });
+    cut.plate.push(b - a);
+    // ob sohi se razmik meri od osi sohe
+    const c0 = ea ? a + 0.04 : a - 0.1, c1 = eb ? b - 0.04 : b + 0.1;
+    const n = Math.ceil((c1 - c0) / 0.625), e = (c1 - c0) / n;
+    for (let k = ea ? 0 : 1; k <= (eb ? n : n - 1); k++) {
+      const sc = c0 + k * e, pts = profile(sc - 0.04, sc + 0.04, zp, rafterLine);
+      const h = Math.max(...pts.map(p => p[1])) - zp;
+      add('gables', prismX(pts, ...at(-0.12, 0), M.stud), { t: `Stojka 8/12 – ${g.n} zatrep`, d: [`predpostavka: C24, e = ${fmt(e * 100, 0)} cm`, `Y = ${fmt(sc + YR)} m, dolžina do ${fmt(h)} m`, 'zgoraj poševno odrezana v naklonu strehe', 'notranji rob ob krajnem škarniku'] });
+      cut.stud.push(h);
+    }
+  }
+  for (const p of P) add('gables', prismX(profile(p - 0.1, p + 0.1, 8.244, rafterLine), ...at(-0.12, 0), M.stud), { t: `Vložek nad vmesno lego – ${g.n} zatrep`, d: ['predpostavka', 'lega gre čez soho do zunanjega roba zatrepa', 'podlaga za pritrditev OSB do strešne linije'] });
+  const osb = profile(sA, sB, g.zb, rafterLine); osbArea += area(osb);
+  add('gables', prismX(osb, ...at(0, 0.018), M.osb), { t: `OSB plošča – ${g.n} zatrep`, d: ['OSB/3, predpostavka 18 mm', 'zunanja obloga lesene okvirne stene, deluje kot šipa', 'PZI: opeka Porotherm 25 S + AB vezi – sprememba, potrdi statik'] });
+
+  // obešena fasada FZ3.1: mineralna volna + morali, folija, alu podkonstrukcija, Swisspearl 8 mm
+  const f0 = 0.018, f1 = f0 + g.mw, f2 = f1 + 0.002, f3 = f2 + g.air, f4 = f3 + 0.008;
+  const full = profile(g.tipN, 4.975, 5.88, capLine);
+  add('facade', prismX(full, ...at(f0, f1), M.mw), { t: `Mineralna volna ${fmt(g.mw * 100, 0)} cm – ${g.n} zatrep`, d: ['Knauf NaturBoard Venti med horizontalnimi lesenimi morali', 'po PZI (FZ3.1)'] });
+  for (let z = 6.0; ; z += 0.6) {
+    const dm = (ZCOV - 0.02 - (z + 0.05)) / T; if (dm < 0.1) break;
+    add('facade', box(...at(f0, f1), Math.max(g.tipN, -dm) + YR, Math.min(4.975, dm) + YR, z, z + 0.05, M.stud), { t: 'Horizontalni moral', d: ['v sloju mineralne volne (FZ3.1)'] });
+  }
+  add('facade', prismX(full, ...at(f1, f2), M.membrane), { t: 'Vetrna zapora', d: ['črna paroprepustna folija Knauf Homeseal LDS 0.02 UV', 'polno spojeni stiki, UV stabilna (odprte fuge)'] });
+  for (let k = -8; k <= 8; k++) {
+    const s = k * 0.625; if (s <= g.tipN + 0.05 || s >= 4.975 - 0.05) continue;
+    add('facade', box(...at(f2, f3), s + YR - 0.02, s + YR + 0.02, 5.88, capLine(Math.abs(s) + 0.02), M.alu), { t: 'Alu podkonstrukcija', d: [`tipska, zračni sloj ${fmt(g.air * 100, 0)} cm`, 'nosi nevidno pritrjene plošče'] });
+  }
+  // plošče: navpični pasovi 1,25 m simetrično na sleme, zgoraj trikotna plošča 0,98 m
+  const gap = 0.004, zh = capLine(1.25);
+  const J = [g.tipN, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 4.975];
+  const panel = (pts, txt) => { panelArea += area(pts); add('facade', prismX(pts, ...at(f3, f4), M.panel), { t: `Swisspearl plošča – ${g.n} zatrep`, d: [txt, 'vlaknocement 8 mm, Nobilis Crystal 124 ali Carat Crystal 8010', 'nevidno pritrjena; barva po izbiri arhitekta'] }); };
+  for (let i = 0; i < J.length - 1; i++) {
+    const a = J[i] + gap, b = J[i + 1] - gap;
+    if (J[i] >= -1.25 && J[i + 1] <= 1.25) panel([[a, 5.88], [b, 5.88], [b, zh - gap], [a, zh - gap]], 'pas 1,25 m, višina 2,90 m');
+    else panel(profile(a, b, 5.88, capLine), `pas ${fmt(J[i + 1] - J[i])} m`);
+  }
+  const w = (capLine(0) - zh - gap) / T;
+  panel([[-w, zh + gap], [w, zh + gap], [0, capLine(0)]], 'trikotna plošča pod slemenom, višina 0,98 m');
+  add('facade', prismX([[-0.45, capLine(0) - 0.6], [0.45, capLine(0) - 0.6], [0, capLine(0) - 0.15]], ...at(f4, f4 + 0.003), M.perf), { t: 'Perforacije za zračenje podstrešja', d: ['na vrhu obeh zatrepov', 'izvedba po dogovoru z arhitektom'] });
+}
+
+// ---------- strešni sloji (detajli po navodilih Swisspearl, Ravna kritina CH, EP 400×400) ----------
+let nBat = 0;
+for (const sd of [-1, 1]) {
+  const de = dDeck[sd];
+  add('boards', slope(sd, 0, de, 0, 0.025, VERGE[0], VERGE[1], M.board), { t: 'Polno podeskanje 2,5 cm', d: ['smrekove deske', 'nad njimi folija Knauf Homeseal LDS 0.04 FixPlus'] });
+  RAFTERS.forEach(x => add('battens', slope(sd, 0.02, de, 0.025, 0.085, x - 0.02, x + 0.02, M.cbatten), { t: 'Kontraletva 6/4', d: ['v osi škarnika, vijačena skozi folijo in deske', 'zračni sloj 6 cm (Jerkovič ponuja 5/8)', 'Swisspearl: min. 45 mm (naklon > 25°, špirovec 5–10 m, sneg < 3,67 kN/m²)'] }));
+  const sl = de / C;
+  add('battens', slope(sd, de - 0.15 * C, de, 0.085, 0.125, VERGE[0], VERGE[1], M.batten), { t: 'Kapna deska 150 × 40 mm', d: ['Swisspearl: kapna deska 150 mm × debelina letev', 'na njej podložna letvica 5×20 mm (nagib prve vrste)', 'perforirana odkapna pločevina, previs plošč 10 mm', 'ob skritem žlebu detajl uskladiti s kleparjem'] });
+  for (let a = 0.25; a < sl - 0.05; a += 0.19) {
+    const d = de - a * C;
+    add('battens', slope(sd, d - 0.025 * C, d + 0.025 * C, 0.085, 0.125, VERGE[0], VERGE[1], M.batten), { t: 'Letev 4/5', d: ['razmik 19 cm – Swisspearl CH, EP 400×400, preklop 12 cm', 'min. 40×50 mm C24 (špirovci do 0,9 m), vlaga ≤ 20 %', 'pri DP 400×400 bi bil razmik 15 cm; statika računa 30 cm – uskladi'] });
+    nBat++;
+  }
+  const cov = slope(sd, 0, de, 0.125, 0.135, VERGE[0], VERGE[1], M.cover.clone());
+  cov.material.map = tex.clone(); cov.material.map.needsUpdate = true;
+  cov.material.map.repeat.set((VERGE[1] - VERGE[0]) / 0.566, (de / C) / 0.566);
+  add('cover', cov, { t: 'Kritina Swisspearl ravna CH', d: ['EP 400×400 – enojno pokrivanje, romb (polagalna mera 500×500)', 'preklop 12 cm, 10,4 plošč/m², kljuke 4×125×29 mm', 'kap in čelo: 2 vrsti dodatno z 2 lepenkarjema 2,3×35', 'barva usklajena s fasadnimi ploščami – potrdi arhitekt'] });
+  add('cover', slope(sd, 0, 0.16, 0.135, 0.155, VERGE[0], VERGE[1], M.nose), { t: 'Zračeno sleme', d: ['ravne slemenske plošče 400×300/280 L/D, 6 parov/m\'', 'slemenske kljuke 3,5×130×30, slemenska pločevina 250×50×50', 'koničnost 20 mm (kot med strešinama 104°)', 'presek zračenja 200 cm²/m\''] });
+  for (const x of VERGE) add('eave', slope(sd, 0, de, -0.2, 0.16, x - 0.02, x + 0.02, M.metal), { t: 'Čelna obroba (zatrep)', d: ['alu barvana pločevina r.š. 40 cm + čelna deska 3 cm', 'brez previsa – ~5 cm čez fasado', 'Swisspearl: vetrna obroba, robne plošče min. 100 mm, vogali odrezani'] });
+}
+const zRidge = ZT0 + 0.085 / C;   // vrh kontraletev v slemenu
+add('battens', box(VERGE[0], VERGE[1], YR - 0.015, YR + 0.015, zRidge, ZCOV, M.batten), { t: 'Slemenska deska 30 mm', d: ['Swisspearl: zračeno sleme – nanjo slemenske kljuke', 'ob njej letve v slemenu (debelina letvanja + 6 mm)', 'lego kljuk zariše krovec pred pokrivanjem'] });
+
+// ---------- kap: skriti žleb, kljun, obloga napušča ----------
+function eave(sd, xa, xb, s1, s2, tip, faceY, name) {
+  const g = M.gutter;
+  add('eave', box(xa, xb, YR + Math.min(s1, s2), YR + Math.max(s1, s2), 5.93, 5.95, g), { t: `Skriti ležeči žleb – ${name}`, d: ['padec 0,5 %, ogrevan (popis)', 'OSB/LIP korito + pločevina 1 mm ali membrana', `dolžina ${fmt(xb - xa)} m`] });
+  add('eave', box(xa, xb, YR + s1 - 0.01, YR + s1 + 0.01, 5.93, zCov(Math.abs(s1)) - 0.02, g));
+  add('eave', box(xa, xb, YR + s2 - 0.01, YR + s2 + 0.01, 5.93, zCov(Math.abs(s2)), g));
+  add('eave', prismX([[s2, 5.905], [s2, zCov(Math.abs(s2))], [tip, 5.905]], xa, xb, M.nose), { t: `Kljun napušča – ${name}`, d: ['lesena podkonstrukcija, krita kot streha', 'ostri rob kapi na +5,88'] });
+  add('eave', box(xa, xb, Math.min(faceY, YR + tip), Math.max(faceY, YR + tip), 5.88, 5.905, M.soffit), { t: 'Obloga napušča', d: ['horizontalne termo borove deske 5 cm, reže 1 cm', 'v ravnini skritih okenskih profilov; nadaljuje se pod nadstrešnico'] });
+}
+eave(-1, VERGE[0], 6.982, -4.235, -4.485, -4.965, -0.41, 'sever (zahodni del)');
+eave(1, VERGE[0], VERGE[1], 4.401, 4.646, 4.975, 8.20, 'jug');
+add('eave', box(6.982, VERGE[1], -0.435, -0.415, 6.30, zCov(4.24) + 0.02, M.metal), { t: 'Priključek na zeleno streho nadstrešnice', d: ['voda s strešine direktno na ravno streho', 'HI se nadaljuje min. 40 cm nad ravno streho'] });
+
+// ---------- dimnik, odduh ----------
+add('extras', box(12.52, 13.0, 4.76, 5.24, 6.20, 10.15, M.chimney), { t: 'Dimnik Schiedel UniPlus 25', d: ['48×48 cm, X 12,52–13,00, Y 4,76–5,24', '⚠ dotika se južne vmesne lege (Y 5,24) – preveri odmik od lesa', '⚠ vzhodni zatrep je zdaj lesen: krajni škarnik ~1 cm, JV soha ~5 cm, stojke in OSB ~13 cm od dimnika', 'višina nad streho ni kotirana (v modelu +10,15)', 'nad streho obloga iz pločevine v barvi kritine, kapa po navodilu arhitekta'] });
+add('extras', box(12.47, 13.05, 4.71, 5.29, 10.15, 10.19, M.metal));
+const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 1.2, 20), M.vent);
+vent.position.set(12.53 - X0, 6.20 + 0.6 + 0.35, 0.14 - YR);
+add('extras', vent, { t: 'Odduh WC Ø110', d: ['skozi streho ob severni kapi', 'tip in barvo potrdi arhitekt (popis Ø100)'] });
+
+// ---------- okolica (obris hiše, nadstrešnica) ----------
+const house = box(-0.10, 13.50, -0.41, 8.20, 0, 6.05, M.ghost); L('context').add(house);
+const edges = new THREE.LineSegments(new THREE.EdgesGeometry(house.geometry), new THREE.LineBasicMaterial({ color: 0x8a8070, transparent: true, opacity: 0.5 }));
+edges.position.copy(house.position); L('context').add(edges);
+add('context', box(4.60, 15.82, -3.81, -0.41, 5.88, 6.30, M.green), { t: 'Nadstrešnica s kolesarnico (S2)', d: ['jeklo HEB200/HEA100, ekstenzivna zelena streha 38,03 m²', 'spodnji rob venca v liniji napušča (+5,88)'] });
+add('context', box(13.50, 15.82, -0.41, 2.31, 5.88, 6.30, M.green));
+
+// ---------- odvodnjavanje: žleb → skrite vertikale v fasadi → peskolovi → RJ → zadrževalnik → odvodnik ----------
+// vertikale: PZI arhitekture (tlorisi 04.1.2–04.1.5); zunanja kanalizacija in kote: KP-137-26 (sept. 2026), ±0,00 = 354,30
+// teren je približen: sever +3,17, terasa ±0,00, vzhodni pas v padcu, zahodne zunanje stopnice
+function Hg(x, y) {
+  if (y < -0.41) return 3.17;
+  if (x < -0.10) return y < 4.8 ? 3.15 : Math.max(-0.02, 3.15 - 3.17 * (y - 4.8) / 4.6);
+  if (x > 13.50 && y <= 8.2) return y < 2.45 ? 3.17 : Math.max(-0.02, 3.17 - 3.19 * (y - 2.45) / 5.1);
+  return -0.02;
+}
+function ground(xa, xb, ya, yb) {
+  const g = new THREE.PlaneGeometry(xb - xa, yb - ya, Math.ceil((xb - xa) / 0.25), Math.ceil((yb - ya) / 0.25));
+  g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setY(i, Hg(p.getX(i) + (xa + xb) / 2, p.getZ(i) + (ya + yb) / 2));
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, M.ground); m.position.set((xa + xb) / 2 - X0, 0, (ya + yb) / 2 - YR); L('ground').add(m);
+}
+ground(-4, 17.5, -6.5, -0.41); ground(-4, 16.4, 8.2, 10.6); ground(-4, -0.10, -0.41, 8.2); ground(13.50, 16.4, -0.41, 8.2);
+
+const P3 = ([x, y, z]) => new THREE.Vector3(x - X0, z, y - YR);
+// cev skozi točke [X, Y, Z] (PZI)
+function pipe(pts, r, m, info) {
+  for (let i = 1; i < pts.length; i++) {
+    const a = P3(pts[i - 1]), b = P3(pts[i]);
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, a.distanceTo(b), 16), m);
+    c.position.copy(a).add(b).multiplyScalar(0.5);
+    c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+    add('drain', c, info);
+    if (i > 1) { const k = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 10), m); k.position.copy(a); add('drain', k, info); }
+  }
+}
+// okrogel jašek s pokrovom
+function shaft(x, y, zb, zt, r, info) {
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, zt - zb, 24), M.shaft);
+  c.position.set(x - X0, (zb + zt) / 2, y - YR); add('drain', c, info);
+  const l = new THREE.Mesh(new THREE.CylinderGeometry(r + 0.03, r + 0.03, 0.03, 24), M.lid);
+  l.position.set(x - X0, zt + 0.015, y - YR); add('drain', l, info);
+}
+const dl = (t, X, Y, Z) => label(t, X, Y, Z, 'd', 'drain');
+
+// iztoka iz skritih žlebov
+add('drain', box(2.30, 2.44, -0.60, -0.47, 5.88, 5.93, M.lid), { t: 'Iztok iz skritega žleba – sever', d: ['X 2,37 – žleb teče z obeh strani proti iztoku (0,5 %)', 'preboj skozi leseni kljun in oblogo napušča'] });
+add('drain', box(13.30, 13.44, 8.28, 8.42, 5.88, 5.93, M.lid), { t: 'Iztok iz skritega žleba – jug', d: ['vzhodni konec – ves južni žleb teče proti vzhodu (0,5 %)', 'preboj skozi leseni kljun in oblogo napušča'] });
+add('drain', box(4.70, 14.70, -3.58, -3.42, 6.30, 6.32, M.gutter), { t: 'Žleb nadstrešnice', d: ['ob severnem robu zelene strehe, padec 0,5 % proti vzhodu', 'nanjo prek zelene strehe odteka tudi vzhodni del severne strešine'] });
+add('drain', box(0.05, 0.80, 7.86, 7.98, 3.02, 3.10, M.gutter), { t: 'Kanal za odtok – terasa ST.2', d: ['ravna streha terase nadstropja (+3,15) pod napuščem', 'lega in dolžina po prerezu 11 – preveri'] });
+
+const V1 = { t: 'Odtok SZ · Ø120/125 (skrit v fasadi)', d: ['iz skritega žleba sever (zahodni del), iztok X 2,37', 'vertikala v severni fasadi nadstropja (FZ2.1) pri X 2,40', 'pod terenom (+3,17) v peskolov PE4', 'PZI: ostrešje Ø125, nadstropje Ø120 – uskladi', '⚠ zračni sloj FZ2.1 je 3 + 3 cm – cev rabi utor v toplotni izolaciji'] };
+pipe([[2.37, -0.535, 5.93], [2.37, -0.535, 5.80], [2.40, -0.33, 5.66], [2.40, -0.33, 2.88], [2.38, -0.62, 2.80]], 0.0625, M.pipe, V1);
+const V2 = { t: 'Odtok JV · Ø100/120 (skrit v fasadi)', d: ['iz vzhodnega konca južnega žleba (X 13,37, Y 8,29)', 'pod napuščem ~1,8 m vodoravno v vzhodni fasadi do Y 6,53 – interpretacija: PZI riše iztok in vertikalo, vmesnega poteka ne', 'vertikala v vzhodni fasadi obeh etaž (FZ2.x / FZ1.2)', 'pod terenom (~+0,6) ~1,5 m do PE2', 'PZI: streha Ø100, nadstropje in pritličje Ø120'] };
+pipe([[13.37, 8.35, 5.93], [13.37, 8.35, 5.80], [13.36, 8.02, 5.74], [13.36, 6.53, 5.70], [13.36, 6.53, 0.25], [13.62, 7.35, -0.30]], 0.06, M.pipe, V2);
+const V3 = { t: 'Odtok JZ · Ø100 – terasa ST.2', d: ['odvaja ravno streho terase nadstropja, ne strešin', 'vertikala v JZ vogalu pritličja (X 0,03, Y 7,98)', 'pod terenom ~2,4 m do PE1'] };
+pipe([[0.05, 7.95, 3.05], [0.03, 7.98, 2.95], [0.03, 7.98, -0.55], [1.25, 10.08, -0.58]], 0.05, M.pipe, V3);
+const V4 = { t: 'Odtok nadstrešnice · Ø125/100', d: ['iz žleba zelene strehe nadstrešnice', 'vertikala v vogalu AB stene nadstrešnice (X 14,6, Y −3,50)', 'pod terenom (+3,17) v peskolov PE3', 'PZI: ostrešje Ø125, pritličje Ø100'] };
+pipe([[14.60, -3.50, 6.30], [14.60, -3.50, 2.88], [15.10, -3.51, 2.80]], 0.0625, M.pipe, V4);
+
+// peskolovi (betonske cevi Ø40 z usedalnikom), revizijska jaška Ø80, lovilec olj
+const kot = (kp, iz, dn) => `pokrov ${kp} · iztok ${iz} · dno ${dn}`;
+shaft(2.37, -0.85, 2.10, 3.10, 0.24, { t: 'Peskolov PE4 · Ø40', d: ['zbira odtok SZ', kot('+3,10 (357,40)', '+2,50', '+2,10')] });
+shaft(15.31, -3.52, 2.10, 3.10, 0.24, { t: 'Peskolov PE3 · Ø40', d: ['zbira odtok nadstrešnice', kot('+3,10 (357,40)', '+2,50', '+2,10')] });
+shaft(13.72, 7.55, -1.00, 0.00, 0.24, { t: 'Peskolov PE2 · Ø40', d: ['zbira odtok JV', kot('±0,00 (354,30)', '−0,60', '−1,00')] });
+shaft(1.38, 10.26, -1.00, 0.00, 0.24, { t: 'Peskolov PE1 · Ø40', d: ['zbira odtok terase JZ', kot('±0,00 (354,30)', '−0,60', '−1,00')] });
+shaft(14.66, -0.85, 2.10, 3.10, 0.40, { t: 'Revizijski jašek RJ2 · Ø80', d: ['pokrov +3,10 (357,40), dno +2,10 (356,40)', 'dotoki: PE4 (12,0 m), PE3 (2,1 m), lovilec olj (3,5 m)'] });
+shaft(14.66, 10.27, -0.80, 0.00, 0.40, { t: 'Revizijski jašek RJ1 · Ø80', d: ['pokrov ±0,00 (354,30), dno −0,80 (353,50)', 'dotoki: drča iz RJ2 (10,5 m), PE1 (12,6 m), PE2'] });
+shaft(14.66, -5.11, 1.35, 3.10, 0.40, { t: 'Lovilec olj in bencina', d: ['za dovoz in parkirišče, Q = 3,0 l/s (SIST EN 858)', 'PZI arh.: Zagožen AQUAoil NS 1.5, 300 l, h = 175 cm', 'ni del strešne odvodnje'] });
+
+// kanalizacija padavinskih vod PVC DN160
+const pvc = (n, x) => ({ t: 'Kanalizacija padavinskih vod · PVC160', d: [n, 'PVC DN160 SN8 (KP-137-26)', ...(x ? [x] : [])] });
+pipe([[2.61, -0.85, 2.50], [14.26, -0.85, 2.38]], 0.08, M.pvc, pvc('PE4 → RJ2: 12,0 m, padec 1,0 %', 'ob severni fasadi, nad drenažo Ø150'));
+pipe([[15.26, -3.32, 2.50], [14.75, -1.24, 2.48]], 0.08, M.pvc, pvc('PE3 → RJ2: 2,1 m, padec 1,0 %'));
+pipe([[14.66, -4.71, 2.50], [14.66, -1.25, 2.47]], 0.08, M.pvc, pvc('lovilec olj → RJ2: 3,5 m, padec 1,0 %'));
+pipe([[14.66, -0.45, 2.10], [14.66, 2.45, 2.05], [14.66, 7.55, -0.70], [14.66, 9.87, -0.72]], 0.08, M.pvc, pvc('RJ2 → RJ1: 10,5 m, drča v padcu terena', 'ob vzhodni fasadi'));
+pipe([[13.86, 7.69, -0.60], [14.50, 8.30, -0.68]], 0.08, M.pvc, pvc('PE2 → kanal RJ2–RJ1'));
+pipe([[1.58, 10.26, -0.60], [14.26, 10.27, -0.73]], 0.08, M.pvc, pvc('PE1 → RJ1: 12,6 m, padec 1,0 %', 'pod teraso ob južni fasadi'));
+pipe([[14.85, 10.48, -0.80], [14.97, 11.17, -0.82]], 0.08, M.pvc, pvc('RJ1 → zadrževalnik: 1,0 m, padec 2,0 %'));
+pipe([[15.66, 13.15, -1.55], [16.91, 16.76, -2.30]], 0.08, M.pvc, pvc('zadrževalnik → odvodnik: 3,8 m, drča', 'za dušilko pretoka in varnostnim prelivom'));
+pipe([[16.90, 14.6, -2.30], [16.90, 19.0, -2.36]], 0.10, M.exist, { t: 'Obstoječ meteorni odvodnik BC Ø200', d: ['zacevljen na parceli investitorja', 'globino je treba preveriti pred izvedbo (opomba v načrtu)', 'lega in globina v modelu sta približni'] });
+{ const zd = new THREE.Mesh(new THREE.BoxGeometry(2.00, 1.40, 2.10), M.zd);
+  zd.position.set(15.315 - X0, -1.05, 12.16 - YR); zd.rotation.y = 0.336;
+  add('drain', zd, { t: 'Zadrževalnik padavinske vode', d: ['tipski, min. volumen 2,2 m³ (KP-137-26)', 'dotok kv 353,48 (−0,82)', 'dušilka pretoka Q = 1,6 l/s (npr. ACO Qbrake Vortex) + varnostni preliv PVC160', 'PZI arhitekture navaja zbiralnik deževnice s prelivom v ponikovalnico – uskladi'] }); }
+
+dl('SZ odtok Ø120/125', 2.4, -0.95, 4.6); dl('JV odtok Ø100/120', 13.6, 6.53, 3.2); dl('JZ odtok terase Ø100', -0.3, 8.4, 1.8); dl('Odtok nadstrešnice Ø125/100', 14.6, -3.9, 4.6);
+dl('PE4', 2.37, -1.2, 3.4); dl('PE3', 15.5, -3.9, 3.4); dl('PE2', 13.9, 7.85, 0.35); dl('PE1', 1.38, 10.6, 0.35);
+dl('RJ2', 14.9, -0.6, 3.5); dl('RJ1', 14.9, 10.5, 0.4); dl('Lovilec olj', 14.66, -5.11, 3.5);
+dl('Zadrževalnik 2,2 m³', 15.3, 12.2, -0.15); dl('Obstoječ odvodnik BC Ø200', 16.9, 18.4, -1.9);
+dl('PVC160 · 12,0 m · 1 %', 8.3, -1.0, 2.95); dl('PVC160 · 12,6 m · 1 %', 7.9, 10.45, -0.25); dl('PVC160 · 10,5 m · drča', 15.0, 4.8, 1.7);
+
+// ---------- oznake ----------
+label('Sleme +9,75', 13.7, YR, 9.95);
+label('Kap +5,88', 13.75, 8.85, 5.7);
+label('38°', 13.75, 6.6, 7.75);
+label('Vmesna lega 20/22', -0.6, 2.31, 8.15);
+label('Vmesna lega 20/22', -0.6, 5.34, 8.15);
+label('Kapna lega 20/22', -0.6, -0.05, 6.35);
+label('Kapna lega – zamik', 4.85, 7.9, 6.75, 'w');
+label('Soha 20/20 + ročice', 4.724, 2.31, 7.45);
+label('Soha (stoji na plošči?)', 9.804, 5.34, 7.2, 'w');
+label('Dodani sohi v ravnini zatrepa', 0.1, 3.825, 7.55);
+label('Zatrep: OSB + fasada Swisspearl', -0.4, 6.4, 6.9);
+label('Perforacije – zračenje', -0.4, YR, 9.25);
+label('Dodani sohi v ravnini zatrepa', 13.15, 3.825, 7.55);
+label('Dimnik Schiedel UniPlus 25', 12.76, 5.0, 10.45, 'w');
+label('Odduh Ø110', 12.53, 0.14, 7.45);
+label('Izrez 70/110', 9.93, 2.9, 6.45);
+label('AB nosilec 25/90', 7.5, 6.51, 7.05);
+label('Skriti žleb 0,5 %', 2.0, 8.55, 6.2);
+label('Škarnik 12/14 · e = 86 cm', 7.06, 6.0, 8.0);
+for (const [n, x] of [['1', 0.125], ['2', 4.724], ['3', 9.804], ['4', 13.124]]) label(n, x, -2.0, 6.05, 'ax');
+for (const [n, y] of [['A', 0], ['B', 2.31], ['C', 7.86]]) label(n, -1.4, y, 6.05, 'ax');
+label('SEVER', 6.625, -3.2, 6.05, 'cmp'); label('JUG', 6.625, 10.2, 6.05, 'cmp');
+label('ZAHOD', -2.6, YR, 6.05, 'cmp'); label('VZHOD', 16.5, YR, 6.05, 'cmp');
+
+// axis lines (green, like PZI)
+const axMat = new THREE.LineDashedMaterial({ color: 0x2E9A4A, dashSize: 0.3, gapSize: 0.15 });
+const axLine = (a, b) => { const g = new THREE.BufferGeometry().setFromPoints([a, b]); const l = new THREE.Line(g, axMat); l.computeLineDistances(); L('labels').add(l); };
+for (const x of [0.125, 4.724, 9.804, 13.124]) axLine(new THREE.Vector3(x - X0, 6.06, -2.0 - YR), new THREE.Vector3(x - X0, 6.06, 9.0 - YR));
+for (const y of [0, 2.31, 7.86]) axLine(new THREE.Vector3(-1.4 - X0, 6.06, y - YR), new THREE.Vector3(14.2 - X0, 6.06, y - YR));
+
+Object.values(layers).forEach(g => scene.add(g));
+
+// ---------- sloji (UI) ----------
+const LAYERS = [
+  ['rafters', 'Škarniki 12/14', '#D2AA77', true], ['purlins', 'Lege 20/22', '#B9884F', true], ['posts', 'Sohe 20/20 + ročice', '#A4733F', true],
+  ['concrete', 'AB plošča + nosilci 25/90', '#BDBAB2', true], ['gables', 'Zatrepa: lesena stena + OSB', '#D8B47C', true],
+  ['facade', 'Fasada zatrepov Swisspearl', '#CDD1D3', true],
+  ['boards', 'Deske 2,5 cm', '#E0C89E', false], ['battens', 'Kontraletve + letve', '#B48E5C', false], ['cover', 'Kritina Swisspearl', '#B4B9BC', false],
+  ['eave', 'Kap: žleb, kljun, obroba', '#4A4D50', true], ['drain', 'Odvodnjavanje: odtoki, peskolovi, kanal', '#2F6FA3', true], ['extras', 'Dimnik, odduh', '#9DA2A6', true],
+  ['context', 'Obris hiše, nadstrešnica', '#7E9B68', true], ['ground', 'Teren (približno)', '#8FA77A', true], ['labels', 'Oznake in osi', '#2E9A4A', true]
+];
+const lw = document.getElementById('layers');
+LAYERS.forEach(([k, n, c, on]) => {
+  const id = 'ly-' + k;
+  lw.insertAdjacentHTML('beforeend', `<label><input type="checkbox" id="${id}" ${on ? 'checked' : ''}><span class="sw" style="background:${c}"></span>${n}</label>`);
+  const set = v => { if (layers[k]) layers[k].visible = v; updateLabels(); };
+  set(on);
+  document.getElementById(id).addEventListener('change', e => set(e.target.checked));
+});
+
+// ---------- kosovnica ----------
+(() => {
+  const sum = a => a.reduce((s, v) => s + v, 0);
+  const rows = [];
+  const rN = cut.raf.filter((_, i) => i % 2 === 0), rS = cut.raf.filter((_, i) => i % 2 === 1);
+  rows.push(['Škarnik S', '12/14', rN.length, rN[0], sum(rN), 0.12 * 0.14]);
+  rows.push(['Škarnik J', '12/14', rS.length, rS[0], sum(rS), 0.12 * 0.14]);
+  cut.pur.forEach(([n, l]) => rows.push([n.replace(' – ', ' '), '20/22', 1, l, l, 0.20 * 0.22]));
+  rows.push(['Soha', '20/20', cut.post.length, null, sum(cut.post), 0.04]);
+  rows.push(['Ročica (predp.)', '12/12', cut.brace.length, cut.brace[0], sum(cut.brace), 0.0144]);
+  rows.push(['Stojka zatrepa (predp.)', '8/12', cut.stud.length, null, sum(cut.stud), 0.0096]);
+  rows.push(['Prag zatrepa (predp.)', '12/8', cut.plate.length, cut.plate[0], sum(cut.plate), 0.0096]);
+  let tot = 0;
+  const tr = rows.map(([n, p, k, l, s, a]) => { const v = s * a; tot += v; return `<tr><td>${n}</td><td>${p}</td><td class="n">${k}</td><td class="n">${l ? fmt(l) : '–'}</td><td class="n">${fmt(s, 1)}</td><td class="n">${fmt(v, 3)}</td></tr>`; }).join('');
+  const deck = (dDeck['-1'] + dDeck['1']) / C * (VERGE[1] - VERGE[0]);
+  const bat = Math.round(nBat * (VERGE[1] - VERGE[0]));
+  document.getElementById('kos').innerHTML =
+    `<thead><tr><th>Element</th><th>b/h</th><th class="n">kos</th><th class="n">m/kos</th><th class="n">skupaj m</th><th class="n">m³</th></tr></thead><tbody>${tr}</tbody>` +
+    `<tfoot><tr><td colspan="5">Konstrukcijski les C24 skupaj</td><td class="n">${fmt(tot, 2)}</td></tr></tfoot>` +
+    `<tbody><tr><td>Deske 2,5 cm (do fasade)</td><td></td><td></td><td></td><td class="n" colspan="2">${fmt(deck, 1)} m²</td></tr>` +
+    `<tr><td>OSB zatrepov (predp. 18 mm)</td><td></td><td class="n">2</td><td></td><td class="n" colspan="2">${fmt(osbArea, 1)} m²</td></tr>` +
+    `<tr><td>Swisspearl fasada zatrepov (neto)</td><td></td><td class="n">2</td><td></td><td class="n" colspan="2">${fmt(panelArea, 1)} m²</td></tr>` +
+    `<tr><td>Kontraletve 6/4</td><td></td><td class="n">32</td><td></td><td class="n" colspan="2">${fmt(sum([-1, 1].map(sd => 16 * dDeck[sd] / C)), 0)} m</td></tr>` +
+    `<tr><td>Letve 4/5 na 19 cm</td><td></td><td></td><td></td><td class="n" colspan="2">≈ ${bat} m</td></tr>` +
+    `<tr><td>Kapna deska 150×40</td><td></td><td class="n">2</td><td></td><td class="n" colspan="2">${fmt(2 * (VERGE[1] - VERGE[0]), 1)} m</td></tr>` +
+    `<tr><td>Slemenska deska 30 mm</td><td></td><td class="n">1</td><td></td><td class="n" colspan="2">${fmt(VERGE[1] - VERGE[0], 1)} m</td></tr></tbody>`;
+})();
+
+// ---------- kamera, pogledi ----------
+const views = {
+  iso: [[17, 16.5, 19.5], [0, 7.2, 0]], jug: [[0, 8.2, 24], [0, 7.6, 0]], sever: [[0, 8.2, -24], [0, 7.6, 0]],
+  vzhod: [[15, 7.9, 0], [0, 7.6, 0]], zahod: [[-17, 7.9, 0], [0, 7.6, 0]], zgoraj: [[0, 32, 0.01], [0, 7, 0]], znotraj: [[-6.0, 7.35, 0.0], [4.0, 7.25, 0.0]],
+  odtoki: [[22, 13, 23], [2.5, 2.2, 4.0]]
+};
+let anim = null;
+function go(k) {
+  const [p, t] = views[k];
+  anim = { p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...p), t1: new THREE.Vector3(...t), s: performance.now() };
+}
+camera.position.set(...views.iso[0]); controls.target.set(...views.iso[1]);
+document.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => go(b.dataset.v)));
+// model zamakni desno od panela (namizje)
+function frame() {
+  const open = innerWidth > 640 && !document.getElementById('panel').classList.contains('min');
+  if (open) camera.setViewOffset(innerWidth, innerHeight, -190, 0, innerWidth, innerHeight); else camera.clearViewOffset();
+}
+
+// ---------- prerez ----------
+const plane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+const cutBox = document.getElementById('cut'), cutX = document.getElementById('cutx'), cutV = document.getElementById('cutv');
+function applyCut() {
+  const x = +cutX.value; cutV.textContent = fmt(x);
+  plane.constant = x - X0;
+  renderer.clippingPlanes = cutBox.checked ? [plane] : [];
+  updateLabels();
+}
+// CSS2DRenderer ne upošteva vidnosti skupine – oznake skrijemo posamično
+function updateLabels() {
+  const on = layers.labels.visible, cutOn = document.getElementById('cut')?.checked;
+  layers.labels.children.forEach(o => { if (o.isCSS2DObject) o.visible = on && (!o.userData.layer || layers[o.userData.layer].visible) && (!cutOn || o.position.x <= plane.constant + 0.3); });
+}
+cutBox.addEventListener('change', () => { applyCut(); if (cutBox.checked) go('vzhod'); });
+cutX.addEventListener('input', applyCut);
+document.querySelectorAll('[data-cut]').forEach(b => b.addEventListener('click', () => { cutX.value = b.dataset.cut; cutBox.checked = true; applyCut(); go('vzhod'); }));
+// povezava na pogled, npr. #v=vzhod&cut=2.91&vse=1
+const q = new URLSearchParams(location.hash.slice(1));
+if (q.get('vse')) LAYERS.forEach(([k]) => { const el = document.getElementById('ly-' + k); el.checked = true; el.dispatchEvent(new Event('change')); });
+if (q.has('cut')) { cutX.value = q.get('cut'); cutBox.checked = true; applyCut(); }
+if (views[q.get('v')]) { camera.position.set(...views[q.get('v')][0]); controls.target.set(...views[q.get('v')][1]); }
+
+// ---------- zavihki, panel ----------
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('show', t.id === 't-' + b.dataset.t));
+}));
+const panel = document.getElementById('panel');
+document.getElementById('min').addEventListener('click', e => { panel.classList.toggle('min'); e.target.textContent = panel.classList.contains('min') ? '+' : '–'; frame(); });
+frame();
+
+// ---------- klik = podatki ----------
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+const info = document.getElementById('info'), infoc = document.getElementById('infoc');
+let down = null, sel = null, selEm = null;
+renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+  ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const vis = pick.filter(m => { let o = m; while (o) { if (!o.visible) return false; o = o.parent; } return true; });
+  let hits = ray.intersectObjects(vis, false);
+  if (cutBox.checked) hits = hits.filter(h => h.point.x <= plane.constant + 1e-3);
+  if (sel) { sel.material = selEm; sel = null; }
+  if (!hits.length) { info.classList.add('hidden'); return; }
+  const m = hits[0].object, d = m.userData.info;
+  sel = m; selEm = m.material; m.material = m.material.clone(); m.material.emissive = new THREE.Color(0xB0703F); m.material.emissiveIntensity = 0.45;
+  infoc.innerHTML = `<b>${d.t}</b>` + d.d.map(s => `<div${s.startsWith('⚠') ? ' class="flag"' : ''}>${s}</div>`).join('');
+  info.classList.remove('hidden');
+});
+document.getElementById('infox').addEventListener('click', () => { info.classList.add('hidden'); if (sel) { sel.material = selEm; sel = null; } });
+
+// ---------- zanka ----------
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; frame(); camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); labelR.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => {
+  if (anim) {
+    const k = Math.min(1, (performance.now() - anim.s) / 700), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    camera.position.lerpVectors(anim.p0, anim.p1, e); controls.target.lerpVectors(anim.t0, anim.t1, e);
+    if (k === 1) anim = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  labelR.render(scene, camera);
+});
+</script>
+</body>
+</html>

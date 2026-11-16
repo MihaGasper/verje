@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiša G · Spalnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F0E8; --paper:#FBF8F3; --ink:#2E2925; --muted:#6E645A; --line:#DDD3C6;
+  --accent:#B0703F; --accent-soft:#F0DFCF; --warn:#A6452E; --warn-soft:#F6E1D9;
+  --serif:"EB Garamond", Georgia, serif; --sans:Inter, system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1D1A17; --paper:#26221E; --ink:#EEE7DD; --muted:#B2A89C; --line:#3D3731;
+    --accent:#D49A6A; --accent-soft:#3A2C22; --warn:#E08A70; --warn-soft:#3B2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1D1A17; --paper:#26221E; --ink:#EEE7DD; --muted:#B2A89C; --line:#3D3731;
+  --accent:#D49A6A; --accent-soft:#3A2C22; --warn:#E08A70; --warn-soft:#3B2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans)}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.hero{padding:56px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:500 clamp(36px,6vw,64px)/1.02 var(--serif);margin:14px 0 18px;letter-spacing:-.01em}
+h2{font:500 clamp(28px,4vw,40px)/1.1 var(--serif);margin:0 0 6px}
+h3{font:600 15px/1.3 var(--sans);margin:0 0 6px}
+.lead{font:500 clamp(19px,2.2vw,23px)/1.45 var(--serif);max-width:780px;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;font-size:13px;color:var(--muted)}
+section{padding:52px 0;border-bottom:1px solid var(--line)}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.sub{color:var(--muted);max-width:760px;margin:0 0 26px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px 18px;font-size:14px}
+.card.hot{border-color:var(--warn);box-shadow:inset 0 3px 0 var(--warn)}
+.card p{margin:4px 0 0;color:var(--muted)}
+.card .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.sw{background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;font-size:13px}
+.sw i{display:block;height:84px}
+.sw div{padding:9px 12px}
+.sw b{display:block;font-weight:600}
+.sw span{color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+ul.clean{list-style:none;margin:0;padding:0}
+ul.clean li{padding:11px 0;border-top:1px solid var(--line)}
+ul.clean li:last-child{border-bottom:1px solid var(--line)}
+ul.clean b{font-weight:600}
+.note{background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 16px;border-radius:2px;font-size:14px}
+.note.warn{background:var(--warn-soft);border-left-color:var(--warn)}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 8px 0;border-bottom:1px solid var(--ink)}
+table.t td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.n, table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.tot td{font-weight:600;border-bottom:2px solid var(--ink)}
+table.t .muted{color:var(--muted);font-size:13px}
+.pill{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:#E3E8DA;color:#4F5A3E}.pill.mv{background:#F3E2CF;color:#8A5524}.pill.new{background:#F6E1D9;color:#A6452E}
+.scroll{overflow-x:auto}
+.brief{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:18px 20px;font-size:14px}
+.brief pre{white-space:pre-wrap;font:13.5px/1.6 var(--sans);margin:0}
+.copy{font:500 13px var(--sans);border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;cursor:pointer;margin-bottom:12px}
+.copy.done{background:transparent;color:var(--ink)}
+.btn{display:inline-block;font:500 14px var(--sans);border:1px solid var(--ink);color:var(--ink);text-decoration:none;padding:9px 16px;border-radius:999px;margin:6px 8px 0 0}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.scene{border-radius:4px;padding:16px 18px;font-size:14px;color:#2E2925}
+.scene h3{color:#2E2925}
+.scene p{margin:4px 0 0;color:#5A5047}
+footer{padding:30px 0 60px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Hiša G · Notranja oprema · Koncept 08 · možnost</div>
+    <h1>Spalnica</h1>
+    <p class="lead">Topel skandinavski prostor s pridihom industrijskega lofta. Svetel hrast, lan in volna dajo mehkobo, strop v betonskem videzu in tanke črne jeklene linije pa malo urbanega značaja. Luč je nizka in topla, in nič ne visi nad glavo.</p>
+    <div class="meta">
+      <span>Pritličje · P4 spalnica 19,9 m² in P3 garderoba</span>
+      <span>Po referenčni fotografiji, ki ste jo poslali</span>
+      <span>Osnutek · 15. 11. 2026</span>
+      <span>V 3D modelu je to izbirna možnost, privzeto je osnova iz PZI</span>
+    </div>
+    <a class="btn" href="07_3d_pritlicje.html?k08#Spalnica">Odpri 3D: Spalnica</a>
+    <a class="btn" href="07_3d_pritlicje.html?k08#Postelja">Postelja</a>
+    <a class="btn" href="07_3d_pritlicje.html?k08#Bralni%20koti%C4%8Dek%20(K08)">Bralni kotiček</a>
+    <a class="btn" href="07_3d_pritlicje.html?k08&amp;vecer#Spalnica">Spalnica zvečer</a>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Iz reference</div>
+    <h2>Kaj sem prevzel</h2>
+    <p class="sub">Na fotografiji je spalnica iz svetlega hrasta in toplega sivega ometa: plavajoča postelja, nizko oblazinjeno vzglavje, stenske bralne lučke, omara z osvetljeno odprto nišo in tanke zavese do tal. To se dobro ujema z vašim tlorisom, saj PZI že riše posteljo ob zahodni steni in nizke vgradne elemente ob njej.</p>
+    <div class="cards">
+      <div class="card"><div class="tag">Skandinavsko</div><h3>Svetel hrast povsod, kjer se dotikaš</h3><p>Postelja, nočni omarici in garderoba so v istem hrastovem furnirju z navpično teksturo, da prostor deluje kot ena celota.</p></div>
+      <div class="card"><div class="tag">Skandinavsko</div><h3>Mehki materiali</h3><p>Bouclé vzglavje, lanena posteljnina, ovseno pregrinjalo, debela volnena preproga in tanke lanene zavese.</p></div>
+      <div class="card"><div class="tag">Loft</div><h3>Beton in črno jeklo</h3><p>Strop in AB steber v toplem betonskem videzu. Iz črnega jekla so roke bralnih lučk, tirnica s reflektorji, portal v garderobo, zavesna tirnica, ročaji, okvir slike in stoječa luč.</p></div>
+      <div class="card"><div class="tag">Svetloba</div><h3>Svetloba od spodaj in z boka</h3><p>Stropna LED linija osvetli steno za posteljo, LED pod posteljo sveti ponoči, bralne lučke so ob glavi. Visokih stenskih luči nad posteljo ni.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Paleta</div>
+    <h2>Topli toni, malo kontrasta</h2>
+    <p class="sub">Večina prostora je v peščenih in kremnih tonih. Kontrast dajeta samo črno jeklo in en konjak poudarek. Rjasta blazina, usnjen fotelj in slika povežejo spalnico z oker toni v dnevnem prostoru.</p>
+    <div class="swatches">
+      <div class="sw"><i style="background:#DDD2C4"></i><div><b>Apneni omet</b><span>stena za posteljo · #DDD2C4</span></div></div>
+      <div class="sw"><i style="background:#F3EEE4"></i><div><b>Topla bela</b><span>ostale stene · #F3EEE4</span></div></div>
+      <div class="sw"><i style="background:#CEC6BB"></i><div><b>Betonski videz</b><span>strop, steber · #CEC6BB</span></div></div>
+      <div class="sw"><i style="background:#D2B48C"></i><div><b>Hrast, naravno olje</b><span>postelja, omare · #D2B48C</span></div></div>
+      <div class="sw"><i style="background:#ECE5D8"></i><div><b>Bouclé, kremna</b><span>vzglavje, blazine · #ECE5D8</span></div></div>
+      <div class="sw"><i style="background:#D6C4A8"></i><div><b>Oves</b><span>pregrinjalo, lan · #D6C4A8</span></div></div>
+      <div class="sw"><i style="background:#9A5A32"></i><div><b>Konjak usnje</b><span>fotelj, poudarek · #9A5A32</span></div></div>
+      <div class="sw"><i style="background:#2B2826"></i><div><b>Črno jeklo</b><span>mat prašno barvano · #2B2826</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Po prostoru</div>
+    <h2>Kaj je v spalnici</h2>
+    <p class="sub">Vse stoji tam, kjer pohištvo riše PZI arhitekture. Spremenjeni so samo materiali, oblika in svetila.</p>
+    <div class="two">
+      <ul class="clean">
+        <li><b>Stena za posteljo (zahodna).</b> Apneni omet v toplem greige tonu, ki ga od zgoraj oplazi LED linija v stropu. To je glavni »wow« trenutek prostora, kot na referenci.</li>
+        <li><b>Postelja 180 × 200, plavajoča.</b> Hrastov podest debeline 8 cm sega 10 cm čez ležišče ob straneh in 15 cm pri nogah. Podnožje je umaknjeno in temno, zato postelja lebdi. Spodaj je nočna LED na senzor gibanja.</li>
+        <li><b>Vzglavje.</b> Dve vodoravni bouclé blazini, skupaj višine 78 cm od podesta, čez celo širino postelje.</li>
+        <li><b>Nočni omarici.</b> To sta nizka vgradna elementa iz PZI (237 in 111 cm), stenska in 14 cm nad tlemi, v hrastu s predali. Na levem sta opal kroglasta namizna luč in kup knjig, slika velikega formata pa je naslonjena na steno.</li>
+        <li><b>Bralni lučki.</b> Stenski, na zgibni črni roki s kremnim senčnikom, na višini 1,2 m in s stikalom na lučki.</li>
+        <li><b>Ob postelji na vsaki strani:</b> glavno stikalo, tipka za žaluzije, USB-A/C in dvojna vtičnica na višini 0,72 m. To je predlog iz prejšnjega pregleda.</li>
+      </ul>
+      <ul class="clean">
+        <li><b>Strop.</b> Topel betonski videz (dekorativni omet ali mikrocement v tankem sloju). AB steber ob omari ostane v istem videzu. Glavna luč 5b je črna nadgradna tirnica s štirimi reflektorji, ki osvetlijo noge postelje, sliko in vhod v garderobo.</li>
+        <li><b>Garderoba.</b> Omare do stropa v hrastovem furnirju s črnimi jeklenimi ročaji. V severni vrsti je osvetljena odprta niša s policami in predali, kot na referenci. Proti spalnici je hrbet omar oblečen v hrast. Vhod v garderobo uokvirja tanek črn jeklen portal.</li>
+        <li><b>Bralni kotiček.</b> V niši ob zasteklitvi (103 × 104 cm) stojita usnjen fotelj v barvi konjaka in črna stoječa luč. Ta je priklopljena na vtičnico, ki se vklopi s stikalom ob vratih.</li>
+        <li><b>Zavese.</b> Tanek lan do tal na črni stropni tirnici pred zasteklitvijo O1, na valovni (wave) tirnici. Temo zagotavljajo zunanje žaluzije, zavesa je za mehkobo in zasebnost čez dan.</li>
+        <li><b>Preproga.</b> Volnena, kremna, 200 × 260 cm, pod spodnjima dvema tretjinama postelje.</li>
+        <li><b>Viseča luč 5a pri vratih.</b> Črna emajlirana kupola, spodnji rob na višini 1,8 m.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Svetloba</div>
+    <h2>Trije večerni prizori</h2>
+    <p class="sub">Vse luči so tople (2700 K) in zatemnilne, razen bralnih lučk (3000 K, ozek snop).</p>
+    <div class="scenes">
+      <div class="scene" style="background:#F1E6D6"><h3>Večer</h3><p>LED linija ob steni na 60 %, opal luč na omarici in stoječa luč v kotičku. Tirnica je ugasnjena.</p></div>
+      <div class="scene" style="background:#E8DCC8"><h3>Branje</h3><p>Ena ali obe bralni lučki in LED linija na 20 %. Partner lahko spi, ker je snop ozek.</p></div>
+      <div class="scene" style="background:#DCD3C6"><h3>Noč</h3><p>Glavno stikalo ob postelji ugasne vse. Ko vstaneš, se LED pod posteljo vklopi na 10 % in ugasne po dveh minutah.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Za elektrikarja</div>
+    <h2>Spremembe glede na PZI elektro</h2>
+    <p class="sub">Skupaj s predlogom ob postelji iz prejšnjega pregleda. Izvodi za 5a, 5b in 5c ostanejo na mestih iz PZI.</p>
+    <div class="scroll">
+      <table class="t">
+        <thead><tr><th>Oznaka</th><th>Sprememba</th><th>Status</th></tr></thead>
+        <tbody id="elBody"></tbody>
+      </table>
+    </div>
+    <div class="brief" style="margin-top:22px"><button class="copy" data-for="elBrief" type="button">Kopiraj besedilo</button><pre id="elBrief"></pre></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Za mizarja in ključavničarja</div>
+    <h2>Kaj naročiti</h2>
+    <div class="brief"><button class="copy" data-for="mzBrief" type="button">Kopiraj besedilo</button><pre id="mzBrief"></pre></div>
+    <div class="note warn" style="margin-top:22px"><b>Za arhitektko:</b> PZI nad posteljo riše skok AB plošče navzdol (svetlo siva šrafura) in navzdol obrnjena AB nosilca 20/35. Betonski videz stropa ju lepo poudari, zato preverite z arhitektko, kje točno potekata in ali je strop v PZI predviden za omet. Betonski videz je dekorativni zaključni sloj in ne surov beton. Zavesna tirnica pride tik ob 10 cm zamiku plošče za zasteklitev.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Proračun</div>
+    <h2>Spalnica in garderoba</h2>
+    <p class="sub">Ocene z DDV, brez vgradnje svetil (elektro dela). Garderoba je največja postavka, ker je omar skupaj okrog 8,6 m dolžine do stropa.</p>
+    <div class="scroll">
+      <table class="t">
+        <thead><tr><th>Postavka</th><th class="n">Varčno</th><th class="n">Kot na referenci</th></tr></thead>
+        <tbody id="budgetBody"></tbody>
+      </table>
+    </div>
+    <div class="note warn" style="margin-top:22px"><b>Proračun je tesen.</b> Za celotno pritličje je ostalo okrog 30.000 €. Spalnica z garderobo bi v varčni različici porabila približno polovico tega, kar pa mora pokriti še kopalnico s savno, pisarno P8, utility in hodnik. Največ privarčujete z garderobo v hrastovem dekorju (Egger) namesto furnirja, pri čemer ostanejo furnirani samo vidni deli v spalnici, in z brušenim AB stropom namesto dekorativnega ometa. Postelja, nočni omarici, svetila in tekstil so tisto, kar ustvari vtis s fotografije, zato bi pri teh ostal.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Odprto</div>
+    <h2>Kar še potrebujem</h2>
+    <ul class="clean">
+      <li><b>Vzmetnica:</b> imate ustrezno 180 × 200 ali jo kupujete na novo (do 1.400 €)?</li>
+      <li><b>Slika:</b> ali imate sliko velikega formata za steno ob postelji? V modelu je 120 × 100 cm.</li>
+      <li><b>Strop:</b> vam je betonski videz všeč, ali raje toplo bel strop in loft samo v jeklu?</li>
+      <li><b>Garderoba:</b> furnir ali dekor, ter koliko obešanja in koliko predalov potrebujeta.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Hiša G · Koncept 08 · Za zasebno rabo. Mere in pozicije so iz PZI arhitekture 160-22 in PZI elektro 25-016 (avtorske pravice projektantov), cene so ocene.</div>
+</footer>
+
+<script>
+const EL = [
+  ['5d, 5e','Stenski luči na 2,0 m odpadeta. Krogotok postane LED linija v stropu ob zahodni steni (wall-washer, 2700 K, zatemnilna), z napajalnikom v dozi pod stropom.','mv'],
+  ['nova','Bralni lučki ob postelji, izvod na višini 1,2 m pri z ≈ 4,70 in 6,72 m. Napajanje gre čez glavno stikalo, stikalo je na lučki.','new'],
+  ['ob postelji','Na vsaki strani: glavno stikalo (5b oziroma »ugasni vse«), tipka žaluzij 37a+b, USB-A/C in dvojna vtičnica, na višini 0,72 m. Nadomesti 6-delne skupine stikal iz PZI.','mv'],
+  ['nova','Nočna LED pod posteljo s PIR senzorjem. Doza za napajalnik je skrita za podestom na višini 0,15 m ob vzglavju.','new'],
+  ['5b','Izvod ostane, svetilka pa je črna nadgradna (magnetna) tirnica dolžine 1,8 m s 4 reflektorji. Izvod naj bo na sredini tirnice.','ok'],
+  ['5a','Izvod ostane, svetilka je viseča črna kupola.','ok'],
+  ['20a','Vtičnica na stikalo za stoječo luč je po PZI na hrbtu omare ob vhodu v garderobo, kjer ni stene. Predlagam premik v bralni kotiček (zahodna stran slopa, h 0,3 m), na mesto vtičnice 20.','mv'],
+  ['5','LED v garderobi dobi še trakove pod policami odprte niše (napajalnik v omari), na istem krogotoku.','new'],
+];
+const st={ok:['ok','ostane'],mv:['mv','sprememba'],new:['new','novo']};
+document.getElementById('elBody').innerHTML=EL.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td><span class="pill ${st[r[2]][0]}">${st[r[2]][1]}</span></td></tr>`).join('');
+document.getElementById('elBrief').textContent=`Hiša G, pritličje, P4 spalnica: spremembe glede na PZI elektro 25-016 (list pritličja)
+
+`+EL.map((r,i)=>`${i+1}. ${r[0]}: ${r[1]}`).join('\n')+`
+
+Vsa svetila 2700 K in zatemnilna (bralni lučki 3000 K). Pri konceptu z glavnim stikalom »ugasni vse« prosim za predlog izvedbe (KNX tipkalo ali impulzni releji).`;
+document.getElementById('mzBrief').textContent=`Hiša G, pritličje, spalnica P4 in garderoba P3 (pozicije po PZI arhitekture 160-22, tloris pritličja)
+
+1. Postelja 180 × 200, plavajoča: hrastov podest debeline 8 cm, 228 × 200 cm od stene (ob straneh 10 cm, pri nogah 15 cm čez ležišče). Umaknjeno temno podnožje višine 12 cm, profil za LED trak spodaj. Ležišče na letvenem dnu, zgornji rob ležišča na približno 44 cm.
+2. Vzglavje: dve vodoravni oblazinjeni blazini v bouclé blagu, skupaj 78 cm visoko, širina 180 cm, pritrjeni na zahodno steno.
+3. Nizka vgradna elementa ob zahodni steni (237 × 54 cm in 111 × 54 cm), stenska, spodnji rob 14 cm nad tlemi, zgornja plošča na 58 cm. Hrastov furnir z navpično teksturo, predali s push-to-open, plošča iz masivnega hrasta 3 cm. Pri stebru izravnava do slopa.
+4. Garderoba: omare do stropa (h 260 cm) v skupni dolžini okrog 8,6 m, hrastov furnir (varčneje: Egger hrast dekor), ročaji iz črnega jekla, dolžine 60 cm. V severni vrsti je odprta niša 108 cm: spodaj predali do 62 cm, nad njimi police na 105, 140 in 175 cm z LED profili. Hrbet južnih omar proti spalnici je obložen s hrastovim furnirjem.
+5. Ključavničar: portal v garderobo iz črnega jekla (mat prašno barvano), stranici 4 × 60 cm in preklada pod stropom, odprtina 104 cm.
+6. Ključavničar: zavesna tirnica, črna, stropna, 3,55 m, za valovno (wave) zaveso.`;
+const BU=[
+  ['Garderoba, omare do stropa (8,6 m), niša z LED',5200,7800],
+  ['Jeklen portal v garderobo',500,700],
+  ['Nizka vgradna elementa ob postelji, stenska',1800,2400],
+  ['Plavajoča postelja s podestom in vzglavjem',1900,2500],
+  ['Stena za posteljo: apneni omet (~13 m²)',500,700],
+  ['Strop: brušen AB / dekorativni betonski videz, steber',350,1000],
+  ['Svetila (bralni lučki, tirnica, kupola, opal, stoječa, LED linije)',1500,2100],
+  ['Zavese lan + tirnica',600,800],
+  ['Volnena preproga 200 × 260',450,700],
+  ['Usnjen fotelj',600,1100],
+  ['Posteljnina, pregrinjalo, blazine',450,700],
+  ['Dodatki (vaza, okvir za sliko)',100,200],
+];
+const fmt=n=>n.toLocaleString('sl-SI')+' €';let lo=0,hi=0;
+document.getElementById('budgetBody').innerHTML=BU.map(r=>{lo+=r[1];hi+=r[2];return `<tr><td>${r[0]}</td><td class="n">${fmt(r[1])}</td><td class="n">${fmt(r[2])}</td></tr>`;}).join('')+`<tr class="tot"><td>Skupaj brez vzmetnice</td><td class="n">${fmt(lo)}</td><td class="n">${fmt(hi)}</td></tr>`;
+document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',async()=>{const t=document.getElementById(b.dataset.for).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopirano';b.classList.add('done');setTimeout(()=>{b.textContent='Kopiraj besedilo';b.classList.remove('done');},2000);}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.for));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Označeno, kopiraj s Cmd+C';}}));
+</script>
+</body>
+</html>

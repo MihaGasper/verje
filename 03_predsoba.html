@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiša G · Predsoba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F0E8; --paper:#FBF8F3; --ink:#2E2925; --muted:#6E645A; --line:#DDD3C6;
+  --accent:#B0703F; --accent-soft:#F0DFCF; --warn:#A6452E; --warn-soft:#F6E1D9;
+  --serif:"EB Garamond", Georgia, serif; --sans:Inter, system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1D1A17; --paper:#26221E; --ink:#EEE7DD; --muted:#B2A89C; --line:#3D3731;
+    --accent:#D49A6A; --accent-soft:#3A2C22; --warn:#E08A70; --warn-soft:#3B2420;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1D1A17; --paper:#26221E; --ink:#EEE7DD; --muted:#B2A89C; --line:#3D3731;
+  --accent:#D49A6A; --accent-soft:#3A2C22; --warn:#E08A70; --warn-soft:#3B2420;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans)}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.hero{padding:56px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:500 clamp(36px,6vw,64px)/1.02 var(--serif);margin:14px 0 18px;letter-spacing:-.01em}
+h2{font:500 clamp(28px,4vw,40px)/1.1 var(--serif);margin:0 0 6px}
+h3{font:600 15px/1.3 var(--sans);margin:0 0 6px}
+.lead{font:500 clamp(19px,2.2vw,23px)/1.45 var(--serif);max-width:780px;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;font-size:13px;color:var(--muted)}
+section{padding:52px 0;border-bottom:1px solid var(--line)}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.sub{color:var(--muted);max-width:760px;margin:0 0 26px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px 18px;font-size:14px}
+.card.hot{border-color:var(--warn);box-shadow:inset 0 3px 0 var(--warn)}
+.card p{margin:4px 0 0;color:var(--muted)}
+.sheet{background:#FBF8F3;color:#2E2925;border:1px solid var(--line);border-radius:6px;padding:14px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:12px}
+label.tog{font-size:13px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;color:#2E2925}
+#plan,.elev{display:block;width:100%;height:auto}
+#plan .item{cursor:pointer}
+#plan .item:hover > *, #plan .item:focus > *{filter:brightness(.93)}
+#plan .item:focus{outline:none}
+#plan:not(.show-el) #electro,#plan:not(.show-pr) #proposal{display:none}
+.cap{min-height:46px;margin-top:10px;padding:10px 14px;background:#F1EADF;border-radius:4px;font-size:14px;color:#2E2925}
+.cap b{font-weight:600}
+.cap .hint{color:#7A6F64}
+.legend{display:none;columns:2 260px;gap:24px;margin:12px 0 0;padding:0 0 0 20px;font-size:13px;color:#2E2925}
+.legend.on{display:block}
+.legend li{margin:0 0 4px;break-inside:avoid}
+.legend .flag{color:#A6452E;font-weight:600}
+.leghead{display:none;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7A6F64;margin:14px 0 0}
+.leghead.on{display:block}
+.two{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.ecap{font-size:12.5px;color:#6E645A;margin-top:6px}
+ul.clean{list-style:none;margin:0;padding:0}
+ul.clean li{padding:11px 0;border-top:1px solid var(--line)}
+ul.clean li:last-child{border-bottom:1px solid var(--line)}
+ul.clean b{font-weight:600}
+.note{background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 16px;border-radius:2px;font-size:14px}
+.note.warn{background:var(--warn-soft);border-left-color:var(--warn)}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 8px 0;border-bottom:1px solid var(--ink)}
+table.t td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.n, table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.tot td{font-weight:600;border-bottom:2px solid var(--ink)}
+table.t .muted{color:var(--muted);font-size:13px}
+.pill{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:#E3E8DA;color:#4F5A3E}.pill.mv{background:#F3E2CF;color:#8A5524}.pill.new{background:#F6E1D9;color:#A6452E}
+.scroll{overflow-x:auto}
+.bar{display:flex;height:34px;border-radius:4px;overflow:hidden;margin:18px 0 8px;border:1px solid var(--line)}
+.bar div{display:flex;align-items:center;padding:0 8px;font-size:12px;white-space:nowrap;overflow:hidden;color:#2E2925}
+.barleg{font-size:13px;color:var(--muted)}
+.brief{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:18px 20px;font-size:14px}
+.brief pre{white-space:pre-wrap;font:13.5px/1.6 var(--sans);margin:0}
+.copy{font:500 13px var(--sans);border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;cursor:pointer;margin-bottom:12px}
+.copy.done{background:transparent;color:var(--ink)}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px 18px;font-size:14.5px}
+.card .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.card.rec{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.tile{display:block;width:100%;height:110px;border-radius:3px;margin:10px 0 8px}
+footer{padding:30px 0 60px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Hiša G · Notranja oprema · Koncept 03</div>
+    <h1>Predsoba</h1>
+    <p class="lead">Ko odpreš vrata, pogled zdrsne čez stopnišče do južne stekline. Predsoba ima dve žajbljevi omari, klop pod zasteklitvijo in nizko knjižno ograjo ob stopnišču, ki je hkrati polica za ključe in knjige.</p>
+    <div class="meta">
+      <span>Nadstropje · N1 hodnik z garderobo · 13,8 m²</span>
+      <span>Nadaljuje Koncept 02 (varianta A)</span>
+      <span>Osnutek · 24. 10. 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Iz načrtov</div>
+    <h2>Kaj sem našel</h2>
+    <p class="sub">Arhitektka je v PZI s sivimi obrisi že narisala pohištvo predsobe, elektro načrt pa mu sledi. Na tem gradim.</p>
+    <div class="cards">
+      <div class="card hot"><h3>Stikali sta za odprtimi vrati</h3><p>Vhodna vrata (krilo 92 cm) se odpirajo navznoter proti zahodu. Stikali 1 in 1.1 sta po elektro načrtu ob zahodnem podboju, kjer ju odprto krilo zakrije. Predlagam premik k ostalim stikalom vzhodno od zasteklitve.</p></div>
+      <div class="card hot"><h3>Predpražnik je treba vgraditi zdaj</h3><p>Tla so teraco. Vgradni predpražnik potrebuje nišo v estrihu, ki jo je treba predvideti, preden se vlije teraco.</p></div>
+      <div class="card"><h3>Dve 60 cm omari ob vhodu</h3><p>Zahodna (s hladilnikom) in vzhodna. V vzhodno sta vgrajena elektro omarica R-H in razdelilnik talnega gretja, zato mora biti tam hrbet omare odprt.</p></div>
+      <div class="card"><h3>Element ob stopnišču</h3><p>Ob severnem robu stopnišča je narisan 45 cm globok element dolžine 459 cm z lučjo iz tal (1c). Predlagam knjižno ograjo višine 100 cm.</p></div>
+    </div>
+    <div class="note warn" style="margin-top:22px"><b>Pomembno za Koncept 02, dnevni prostor:</b> isti sivi obrisi kažejo ob vzhodni steni 60 cm globoko vgradno steno od vrat do stebra ob steklini. Steklo kamina je narisano južno od dimnika (približno 100 cm), ne na osi dimnika, kot sem predvidel. Preden se karkoli vgradi ali naroči, potrdita položaj kamina z arhitektko in kaminarjem. Nato po potrebi popravim pogled na vzhodno steno in točki 4 in 8 v navodilih za elektrikarja.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Tloris</div>
+    <h2>Predsoba v merilu</h2>
+    <p class="sub">Klikni na kos pohištva za opis in mere. Kuhinja, stopnišče in dnevni prostor so prikazani bledo, za orientacijo.</p>
+    <div class="sheet">
+      <div class="toolbar">
+        <label class="tog"><input type="checkbox" id="elToggle"> Obstoječe elektro točke</label>
+        <label class="tog"><input type="checkbox" id="prToggle"> Predlog sprememb</label>
+      </div>
+      <svg id="plan" viewBox="4.15 -1.0 9.5 4.65" role="img" aria-label="Tloris predsobe">
+        <defs id="defs"></defs>
+        <g id="floors">
+          <rect x="0.73" y="-1.0" width="12.65" height="0.74" fill="#ECE8E1"/>
+          <rect x="1.23" y="0.14" width="3.25" height="4.51" fill="url(#terrazzo)"/>
+          <rect x="4.48" y="0.69" width="0.25" height="3.71" fill="url(#terrazzo)"/>
+          <rect x="4.73" y="0.14" width="7.05" height="2.30" fill="url(#terrazzo)"/>
+          <rect x="4.73" y="2.44" width="1.02" height="0.93" fill="url(#terrazzo)"/>
+          <rect x="10.36" y="2.44" width="2.52" height="0.93" fill="url(#terrazzo)"/>
+          <rect x="11.90" y="0.14" width="0.98" height="2.05" fill="url(#terrazzo)"/>
+          <rect x="4.73" y="3.37" width="8.15" height="4.62" fill="url(#parquet)"/>
+        </g>
+        <g id="stair">
+          <rect x="5.75" y="2.44" width="4.61" height="0.93" fill="#E7DFD3"/>
+          <g id="treads" stroke="#A89C8C" stroke-width="0.012"></g>
+          <path d="M9.9 2.905 H6.1 M6.1 2.905 l0.16 -0.09 M6.1 2.905 l0.16 0.09" stroke="#7A6F64" stroke-width="0.02" fill="none"/>
+          <text x="7.9" y="2.82" font-size="0.15" fill="#7A6F64" text-anchor="middle" font-family="Inter">dol v pritličje</text>
+          <rect x="5.75" y="3.37" width="4.59" height="0.45" fill="#CDAE84" stroke="#2E2925" stroke-width="0.012" opacity="0.45"/>
+          <line x1="5.75" y1="2.44" x2="5.75" y2="3.37" stroke="#2E2925" stroke-width="0.04"/>
+        </g>
+        <g id="walls" fill="#3B342E">
+          <rect x="0.73" y="-0.26" width="1.70" height="0.40"/>
+          <rect x="4.48" y="-0.26" width="2.55" height="0.40"/>
+          <rect x="9.13" y="-0.26" width="4.25" height="0.40"/>
+          <rect x="4.48" y="0.14" width="0.25" height="0.55"/>
+          <rect x="12.88" y="0.14" width="0.50" height="2.29"/>
+          <rect x="12.88" y="3.31" width="0.50" height="3.33"/>
+          <rect x="11.78" y="0.14" width="0.12" height="0.61"/>
+          <rect x="11.78" y="1.55" width="0.12" height="0.64"/>
+          <rect x="11.78" y="2.19" width="1.10" height="0.24"/>
+          <rect x="7.03" y="-0.26" width="0.24" height="0.40" fill="#B9824F"/>
+        </g>
+        <g stroke="#7FA3B0" stroke-width="0.035" fill="none">
+          <line x1="2.43" y1="-0.06" x2="4.48" y2="-0.06"/>
+          <line x1="8.19" y1="-0.06" x2="9.13" y2="-0.06"/>
+          <line x1="13.13" y1="2.43" x2="13.13" y2="3.31"/>
+        </g>
+        <g stroke="#2E2925" stroke-width="0.015" fill="none">
+          <line x1="7.27" y1="-0.05" x2="7.27" y2="0.87" stroke-width="0.03" stroke="#8A5A30"/>
+          <path d="M8.19 -0.05 A0.92 0.92 0 0 1 7.27 0.87" stroke-dasharray="0.05 0.04"/>
+          <line x1="11.78" y1="1.55" x2="10.98" y2="1.55"/>
+          <path d="M11.78 0.75 A0.80 0.80 0 0 0 10.98 1.55" stroke-dasharray="0.05 0.04"/>
+        </g>
+        <g id="context" opacity="0.38"></g>
+        <g font-family="Inter" fill="#6E645A" font-size="0.17" letter-spacing="0.02">
+          <text x="7.7" y="1.62" text-anchor="middle">PREDSOBA</text>
+          <text x="12.39" y="1.25" text-anchor="middle">WC</text>
+          <text x="8.66" y="-0.55" text-anchor="middle" font-size="0.15">vhod ↓</text>
+          <text x="13.55" y="2.87" font-size="0.13" transform="rotate(90 13.55 2.87)" text-anchor="middle">vrata</text>
+          <text x="4.42" y="3.25" font-size="0.14" opacity="0.7">kuhinja</text>
+          <text x="11.3" y="3.25" font-size="0.14" opacity="0.7">dnevni prostor</text>
+        </g>
+        <g id="furniture"></g>
+        <g id="dims" font-family="Inter" font-size="0.13" fill="#7A6F64"></g>
+        <g id="electro"></g>
+        <g id="proposal"></g>
+        <g transform="translate(13.2 -0.62)">
+          <circle r="0.2" fill="none" stroke="#2E2925" stroke-width="0.012"/>
+          <path d="M0 -0.17 L0.07 0.06 L0 0.015 L-0.07 0.06 Z" fill="#2E2925"/>
+          <text y="-0.25" font-size="0.13" text-anchor="middle" font-family="Inter" fill="#2E2925">S</text>
+        </g>
+        <g transform="translate(4.35 3.42)" font-family="Inter" font-size="0.12" fill="#2E2925">
+          <rect width="1" height="0.05" fill="#2E2925"/>
+          <text y="-0.05">0</text><text x="0.92" y="-0.05">1 m</text>
+        </g>
+      </svg>
+      <div class="cap" id="cap"><span class="hint">Klikni na kos pohištva za opis in mere.</span></div>
+      <div class="leghead" id="elHead">Obstoječe točke iz elektro načrta</div>
+      <ol class="legend" id="elLegend"></ol>
+      <div class="leghead" id="prHead">Predlog sprememb</div>
+      <ol class="legend" id="prLegend" type="A"></ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Severna stena</div>
+    <h2>Omara, vrata, klop, omara</h2>
+    <p class="sub">Celotna stena z vhodom, kot jo vidiš s stopnišča. Vse fronte so v istem mat laku kot visoke kuhinjske omare, zato stena deluje kot ena mirna ploskev, iz katere izstopita macesnova vrata in hrastova klop.</p>
+    <div class="sheet"><svg class="elev" id="h1" role="img" aria-label="Pogled na severno steno predsobe"></svg><div class="ecap">Severna stena predsobe, pogled s stopnišča. Levo kuhinja, desno WC.</div></div>
+    <div class="two" style="margin-top:26px">
+      <ul class="clean">
+        <li><b>Zahodna omara, 167 cm</b>, ob hladilniku: plašči, šali, torbe. Notranja luč na 2,2 m je že v elektro načrtu.</li>
+        <li><b>Klop pod fiksno zasteklitvijo, 85 × 40 cm</b>, višina 45 cm, hrast, spodaj dva predala za čevlje, blazina v megleno modrem lanu. Sediš s pogledom proti jugu. Vrata se odpirajo na drugo stran, zato je klop vedno prosta.</li>
+        <li><b>Pas stene 27 cm</b> med zasteklitvijo in vzhodno omaro: vsa stikala, termostat in videofon na enem mestu.</li>
+        <li><b>Vzhodna omara, 236 cm:</b> čevlji, sesalnik, čistila. Za vrati sta elektro omarica in razdelilnik talnega gretja, dostopna brez orodja.</li>
+      </ul>
+      <div class="note"><b>Zakaj ena barva:</b> predsoba je ozka (2 m), zato naj bodo vse omare do stropa in v istem tonu kot stena ali malo temnejše. Prostor deluje večji, poudarek pa ostane na pogledu čez stopnišče.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div style="max-width:760px">
+      <div class="kicker">Ob stopnišču</div>
+      <h2>Knjižna ograja</h2>
+      <p class="sub">Namesto kovinske ograje predlagam hrastov element višine 100 cm. Enak element je tudi na južni strani stopnišča, s knjigami proti jedilnici (Koncept 02), zato kovinska ograja v celoti odpade. S strani predsobe ima odprte police za knjige, s strani stopnišča gladko zaprto ploskev.</p>
+      <ul class="clean">
+        <li><b>459 × 45 × 100 cm</b>, pet polj po okrog 92 cm, dve polici. Skupaj okrog 9 m knjig. Ozadje polj je lakirano v mavčno roza, kot odmev poudarka iz jedilnice.</li>
+        <li><b>Zgornja polica iz masivnega hrasta, 4 cm,</b> je prostor za skledo za ključe (točno nasproti vrat), svetilko in majhne slike. Tu je tudi mesto za en skulpturalni kos: keramiko ali kip slovenskega umetnika.</li>
+        <li><b>LED pod zgornjo polico</b> iz obstoječega izvoda v tleh (1c).</li>
+        <li><b>Varnost:</b> višina najmanj 100 cm, brez polic in opornih točk na strani stopnišča, trdno sidrano v tla. Ustreznost kot ograje potrdi arhitektka.</li>
+      </ul>
+    </div>
+    <div class="sheet" style="margin-top:26px"><svg class="elev" id="h2" role="img" aria-label="Pogled na knjižno ograjo ob stopnišču"></svg><div class="ecap">Knjižna ograja, pogled iz predsobe proti jugu. Levo vzhod, desno kuhinja.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap two">
+    <div>
+      <div class="kicker">WC v nadstropju · 2 m²</div>
+      <h2>En pogumen prostor</h2>
+      <p class="sub">V hišah iz Vogue Living in Elle Decor je skoraj vedno en majhen prostor, kjer se pokaže pogum. Pri vama je to zgornji WC: majhen, zaprt in tik ob predsobi. Napaka tu stane malo, učinek pa je velik.</p>
+      <ul class="clean">
+        <li><b>Prostor 98 × 205 cm</b> z visokim oknom čez vso vzhodno steno (205 × 90 cm, parapet 175 cm). Pod oknom so stene proste za tapeto ali barvo.</li>
+        <li><b>Stene, strop, vrata in obrobe v enem tonu.</b> Tako je majhen prostor objet v barvo in ne razkosan.</li>
+        <li><b>Okroglo ogledalo z medeninastim robom</b> nad umivalnikom, nad njim stenska svetilka, medeninasta pipa in majhna slika v okvirju.</li>
+        <li><b>Brez tuša</b>, zato je tapeta primerna. Izberita pralno ali jo zaščitita z mat lakom.</li>
+      </ul>
+    </div>
+    <div class="cards" style="grid-template-columns:1fr">
+      <div class="card rec"><div class="tag">Priporočam</div><h3>Tapeta z drobnim botaničnim vzorcem</h3>
+        <svg class="tile" viewBox="0 0 300 110" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="wp" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#E9DCC2"/><path d="M8 32 C9 19 18 10 31 9" fill="none" stroke="#6E7A55" stroke-width="1.6"/><ellipse cx="15" cy="19" rx="5.5" ry="2.4" transform="rotate(-45 15 19)" fill="#8C9A6E"/><ellipse cx="24" cy="12" rx="5.5" ry="2.4" transform="rotate(-20 24 12)" fill="#A9B18A"/><ellipse cx="10" cy="27" rx="5.5" ry="2.4" transform="rotate(-70 10 27)" fill="#C08A4E"/><circle cx="32" cy="32" r="2.4" fill="#B05A3C"/><circle cx="3" cy="6" r="1.4" fill="#C08A4E"/></pattern></defs><rect width="300" height="110" fill="url(#wp)"/></svg>
+        <p>Klasičen vzorec, npr. iz arhiva Williama Morrisa, v olivnih in okrastih tonih. Strop in vrata v barvi ozadja tapete. To je tradicionalni in umetniški kotiček hiše.</p></div>
+      <div class="card"><div class="tag">Ceneje</div><h3>Barva čez vse</h3>
+        <div class="tile" style="background:linear-gradient(90deg,#7A2E25 0 50%,#6B6B3E 50% 100%)"></div>
+        <p>Oksidno rdeča ali olivna na stenah, stropu, vratih in obrobah, v polmat laku, npr. Farrow &amp; Ball Eating Room Red ali Bancha.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Razsvetljava</div>
+    <h2>Svetila v predsobi</h2>
+    <p class="sub">Tudi tu 2700 K. Vhod naj ima eno lepo svetilko, ostalo so tihe vgradne luči in luči v pohištvu.</p>
+    <div class="scroll"><table class="t"><thead><tr><th>Točka</th><th>Svetilo</th><th>Stanje</th></tr></thead><tbody id="lightBody"></tbody></table></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap two">
+    <div>
+      <div class="kicker">Za elektrikarja in izvajalca tlakov</div>
+      <h2>Dodatek k navodilom</h2>
+      <p class="sub">Nadaljuje seznam iz Koncepta 02 (točke 1–9). Točka 14 je za izvajalca estriha in teraca.</p>
+    </div>
+    <div class="brief"><button class="copy" data-for="elBrief" type="button">Kopiraj besedilo</button><pre id="elBrief"></pre></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap two">
+    <div>
+      <div class="kicker">Za mizarja</div>
+      <h2>Dodatek k povpraševanju</h2>
+      <p class="sub">Nadaljuje povpraševanje iz Koncepta 02 (postavke 1–9). Zahodna omara s hladilnikom je že postavka 5.</p>
+    </div>
+    <div class="brief"><button class="copy" data-for="mzBrief" type="button">Kopiraj besedilo</button><pre id="mzBrief"></pre></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Proračun</div>
+    <h2>Predsoba in WC: okrog 11.000 €</h2>
+    <p class="sub">Zahodna omara in kolona za hladilnik sta že v proračunu kuhinje. Če knjižna ograja nadomesti kovinsko ograjo iz gradbene pogodbe, se del zneska vrne tam.</p>
+    <div class="bar" aria-hidden="true">
+      <div style="width:24%;background:#C6A47E">Kuhinja 24k</div>
+      <div style="width:7%;background:#E6CBBB">7k</div>
+      <div style="width:28%;background:#B7BDA1">Dnevni 28k</div>
+      <div style="width:11%;background:#AEBFC6">Predsoba 11k</div>
+      <div style="width:30%;background:#ECE4D8">Pritličje 30k</div>
+    </div>
+    <div class="barleg">Od 100.000 € za notranjost po tem konceptu za pritličje (spalnica, garderoba, kopalnica s savno, pisarna, utility, hodnik) ostane okrog 30.000 €. Del tega vrne opustitev kovinske ograje v gradbeni pogodbi (po popisu 2.257 €).</div>
+    <div class="scroll" style="margin-top:18px"><table class="t"><thead><tr><th>Postavka</th><th class="n">Razpon</th></tr></thead><tbody id="budgetBody"></tbody></table></div>
+    <div class="note warn" style="margin-top:22px"><b>Proračun postaja tesen.</b> Predlogi po navdihu revij so skupaj dodali okrog 3.000 €, nova sedežna brez konzole pa je prihranila okrog 2.000 €, drugi dve knjižni ograji ob stopnišču (južna in zahodna) pa sta dodali okrog 5.500 €, zato za pritličje ostane okrog 30.000 €. Če bo premalo, lahko knjižno ograjo naredimo v drugi fazi (do 5.000 €), ograja v gradbeni pogodbi pa ostane do takrat. Pri vzhodni omari lahko prihranimo s preprostejšim korpusom in barvanimi MDF frontami.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Odprto</div>
+    <h2>Kar še potrebujem</h2>
+    <div class="qs" style="margin-top:20px">
+      <div class="q"><b>Položaj kamina</b><br>Potrdita z arhitektko in kaminarjem, ali je steklo južno od dimnika, kot kaže PZI, ali na njegovi osi.</div>
+      <div class="q"><b>Ograja na severni strani stopnišča</b><br>Je kovinska ograja iz popisa mišljena za to stran? Če da, jo knjižna ograja nadomesti.</div>
+      <div class="q"><b>Ali je teraco že vlit?</b><br>Če je, predpražnik odpade in ga nadomesti lepa preproga pred vrati.</div>
+      <div class="q"><b>Koliko knjig imata?</b><br>V nišah ob kaminu in v knjižni ograji je skupaj okrog 20 m polic.</div>
+      <div class="q"><b>WC: tapeta ali barva čez vse?</b><br>Če tapeta, vama pripravim izbor treh vzorcev.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mere so odčitane iz PZI načrta arhitekture (1:50), vključno z obrisi pohištva, in iz PZI elektro načrta, natančnost približno ±5 cm. Pred naročilom pohištva po meri je treba vse izmeriti na objektu. Tloris je poenostavljena prerisba avtorskega načrta arhitektke (Fabrikat) in je namenjen samo vajini uporabi.
+  </div>
+</footer>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+let seed=11;
+const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+function S(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in (attrs||{}))e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+const C={ink:'#2E2925',oak:'#CDAE84',oakL:'#DDC3A0',veneer:'#C29A6E',stone:'#EFE8DC',sage:'#B7BDA1',sageD:'#9AA088',sand:'#E3D3BC',book:'#D3BB97',dark:'#3A3430',blue:'#AEBFC6',ochre:'#C08A4E',wall:'#F3EEE4',larch:'#B9824F',prop:'#C9631F'};
+
+/* patterns */
+const defs=document.getElementById('defs');
+function terrazzo(id,size,k,parent){
+  const p=S('pattern',{id,width:size,height:size,patternUnits:'userSpaceOnUse'},parent);
+  S('rect',{width:size,height:size,fill:'#ECE3D4'},p);
+  const cols=['#C9B79C','#A98B6B','#F8F4EC','#D7A88B','#8E8A80','#BFA27E','#E9D9C2'];
+  for(let i=0;i<Math.round(110*size/(0.8*k));i++){
+    const cx=rnd()*size,cy=rnd()*size,r=(0.006+rnd()*rnd()*0.03)*k,n=4+Math.floor(rnd()*3);let pts=[];
+    for(let j=0;j<n;j++){const a=j/n*Math.PI*2+rnd()*0.8,rr=r*(0.6+rnd()*0.6);pts.push((cx+Math.cos(a)*rr).toFixed(4)+','+(cy+Math.sin(a)*rr).toFixed(4));}
+    S('polygon',{points:pts.join(' '),fill:cols[Math.floor(rnd()*cols.length)]},p);
+  }
+}
+terrazzo('terrazzo',0.8,1,defs);
+(function(){
+  const p=S('pattern',{id:'parquet',width:0.36,height:2.4,patternUnits:'userSpaceOnUse'},defs);
+  S('rect',{width:0.36,height:2.4,fill:'#E4D0B2'},p);S('rect',{x:0.18,width:0.18,height:2.4,fill:'#E0CAA9'},p);
+  [[0,0,0,2.4],[0.18,0,0.18,2.4],[0,0.62,0.18,0.62],[0.18,1.74,0.36,1.74]].forEach(l=>S('line',{x1:l[0],y1:l[1],x2:l[2],y2:l[3],stroke:'#CDB38F','stroke-width':0.006},p));
+  const coir=S('pattern',{id:'coir',width:0.03,height:0.03,patternUnits:'userSpaceOnUse'},defs);
+  S('rect',{width:0.03,height:0.03,fill:'#9C8462'},coir);S('path',{d:'M0 0.015 H0.03 M0.015 0 V0.03',stroke:'#7E6747','stroke-width':0.006},coir);
+})();
+const tr=document.getElementById('treads');
+for(let x=5.75+0.27;x<10.36;x+=0.27)S('line',{x1:x.toFixed(3),y1:2.44,x2:x.toFixed(3),y2:3.37},tr);
+
+/* context (faded) */
+const X=document.getElementById('context');
+const R0=(g,x,y,w,h,f,ex)=>S('rect',Object.assign({x,y,width:w,height:h,fill:f,stroke:C.ink,'stroke-width':0.012},ex||{}),g);
+R0(X,1.23,0.14,1.20,0.60,C.sage);R0(X,2.43,0.14,2.05,0.62,C.stone);R0(X,1.90,2.00,2.90,0.95,C.stone);
+R0(X,9.20,3.60,1.00,2.30,C.sand,{rx:0.06});R0(X,8.80,3.95,0.36,1.60,C.book);
+S('ellipse',{cx:7.17,cy:5.85,rx:0.50,ry:0.90,fill:C.oak,stroke:C.ink,'stroke-width':0.012},X);
+
+/* furniture */
+const F=document.getElementById('furniture'),cap=document.getElementById('cap');
+function show(n,d){cap.innerHTML=`<b>${n}</b> · ${d}`;}
+function item(name,dim){const g=S('g',{class:'item',tabindex:0},F);['mouseenter','click','focus'].forEach(ev=>g.addEventListener(ev,()=>show(name,dim)));S('title',{},g).textContent=name;return g;}
+const R=(g,x,y,w,h,f,ex)=>S('rect',Object.assign({x,y,width:w,height:h,fill:f,stroke:C.ink,'stroke-width':0.014},ex||{}),g);
+const L=(g,x1,y1,x2,y2,c,w)=>S('line',{x1,y1,x2,y2,stroke:c||C.ink,'stroke-width':w||0.01},g);
+let g=item('Vgradni hladilnik','kolona 60 × 62 × 265 cm · enaka fronta kot omare (postavka 5 v Konceptu 02)');
+R(g,4.73,0.14,0.62,0.62,C.sage);S('text',{x:5.04,y:0.5,'font-size':0.11,'text-anchor':'middle','font-family':'Inter',fill:'#4F5544'},g).textContent='HL';
+g=item('Zahodna omara','167 × 60 × 265 cm, dvoje vrat · plašči, šali, torbe · notranja luč na 2,2 m (obstoječa)');
+R(g,5.35,0.14,1.67,0.60,C.sage);L(g,6.185,0.68,6.185,0.74);
+g=item('Vgradni predpražnik','okrog 90 × 70 cm, poravnan s teracom · niša v estrihu pred vlivanjem teraca');
+R(g,7.30,0.18,0.86,0.66,'url(#coir)',{stroke:'#6E5A40'});
+g=item('Klop pod zasteklitvijo','85 × 40 cm, višina 45 cm · hrast, dva predala za čevlje, blazina iz megleno modrega lanu');
+R(g,8.22,0.14,0.85,0.40,C.oak);R(g,8.26,0.18,0.77,0.32,C.blue,{rx:0.04});
+g=item('Vzhodna omara','236 × 60 × 265 cm, troje vrat · čevlji, sesalnik, čistila · za vrati elektro omarica R-H in razdelilnik talnega gretja');
+R(g,9.40,0.14,2.36,0.60,C.sage);L(g,10.187,0.68,10.187,0.74);L(g,10.973,0.68,10.973,0.74);
+S('rect',{x:10.13,y:0.15,width:0.57,height:0.10,fill:'none',stroke:'#5A5048','stroke-width':0.01,'stroke-dasharray':'0.03 0.02'},g);
+S('rect',{x:10.70,y:0.15,width:0.74,height:0.11,fill:'none',stroke:'#5A5048','stroke-width':0.01,'stroke-dasharray':'0.03 0.02'},g);
+g=item('Knjižna ograja ob stopnišču','459 × 45 × 100 cm, hrast · pet polj, dve polici za knjige proti predsobi, zaprta stran proti stopnišču · zgoraj masivna polica 4 cm');
+R(g,5.75,1.99,4.59,0.45,C.oak);R(g,5.75,1.99,4.59,0.27,C.book,{stroke:'none'});
+for(let i=1;i<5;i++)L(g,5.75+i*0.918,1.99,5.75+i*0.918,2.26,'#8A6A4A',0.012);
+for(let x=5.80;x<10.30;x+=0.07)L(g,x,2.02,x,2.22,'#A88E6A',0.005);
+S('circle',{cx:7.73,cy:2.18,r:0.11,fill:'#E9DFCF',stroke:C.ink,'stroke-width':0.01},g);
+g=item('Predalnik z ogledalom','58 × 35 × 80 cm, hrast · luč pod predalnikom je že v elektro načrtu (1f/1g) · nad njim ogledalo 50 × 90 cm');
+R(g,11.42,1.60,0.34,0.56,C.oak);L(g,11.75,1.62,11.75,2.14,'#9FB6BE',0.03);
+
+const D=document.getElementById('dims');
+function dim(x1,y1,x2,y2,t,tx,ty,rot){S('line',{x1,y1,x2,y2,stroke:'#8E8378','stroke-width':0.008},D);const vx=x1===x2;[[x1,y1],[x2,y2]].forEach(p=>S('line',{x1:vx?p[0]-0.04:p[0],y1:vx?p[1]:p[1]-0.04,x2:vx?p[0]+0.04:p[0],y2:vx?p[1]:p[1]+0.04,stroke:'#8E8378','stroke-width':0.01},D));const e=S('text',{x:tx,y:ty,'text-anchor':'middle'},D);if(rot)e.setAttribute('transform',`rotate(${rot} ${tx} ${ty})`);e.textContent=t;}
+dim(6.6,0.74,6.6,1.99,'125',6.53,1.37,-90);
+dim(10.6,0.74,10.6,1.99,'125',10.53,1.37,-90);
+
+/* markers */
+function markers(groupId,list,legendId,shape){
+  const E=document.getElementById(groupId),leg=document.getElementById(legendId);
+  list.forEach((p,i)=>{const gg=S('g',{},E);const lab=shape==='diamond'?String.fromCharCode(65+i):String(i+1);
+    if(p[4])S('path',{d:p[4],fill:'none',stroke:C.prop,'stroke-width':0.03,'stroke-dasharray':'0.08 0.05'},E);
+    if(shape==='diamond')S('rect',{x:p[0]-0.1,y:p[1]-0.1,width:0.2,height:0.2,transform:`rotate(45 ${p[0]} ${p[1]})`,fill:C.prop,stroke:'#fff','stroke-width':0.018},gg);
+    else S('circle',{cx:p[0],cy:p[1],r:0.11,fill:p[3]?'#A6452E':'#2E5E73',stroke:'#fff','stroke-width':0.018},gg);
+    S('text',{x:p[0],y:p[1]+0.045,'font-size':0.12,'text-anchor':'middle','font-family':'Inter','font-weight':600,fill:'#fff'},gg).textContent=lab;
+    const li=document.createElement('li');li.innerHTML=p[3]&&shape!=='diamond'?`<span class="flag">${p[2]}</span>`:p[2];leg.appendChild(li);});
+}
+markers('electro',[
+  [7.12,0.30,'Stikali 1 in 1.1 ob zahodnem podboju vrat',1],[5.04,0.62,'Hladilnik',0],[6.45,0.36,'Luč v omari, h = 2,2 m',0],[5.41,1.32,'Stropna luč 2a',0],
+  [8.05,1.00,'Stropna luč 1b nad vhodom',0],[9.25,0.32,'Stikala, termostat T1, videofon V1',0],[9.79,0.36,'Luč v omari, h = 2,2 m',0],
+  [10.41,0.40,'Elektro omarica R-H (zgornji rob 2,2 m)',0],[11.07,0.40,'Razdelilnik talnega gretja',0],[10.83,1.32,'Stropna luč 1a',0],
+  [6.06,1.88,'Luč v pohištvu, izvod iz tal (1c)',0],[11.60,1.88,'Luč pod predalnikom (1f/1g)',0],[10.85,2.88,'Stropna luč 1a na podestu',0]
+],'elLegend','circle');
+markers('proposal',[
+  [9.27,0.95,'Stikali 1 in 1.1 prestaviti na pas stene vzhodno od zasteklitve',0,'M7.12 0.30 C7.6 1.1 8.8 1.1 9.27 0.95'],
+  [8.64,0.75,'LED pod klopjo s senzorjem gibanja, 230 V na višini 15 cm'],
+  [7.73,1.22,'Niša za vgradni predpražnik v estrihu, okrog 90 × 70 cm'],
+  [10.75,0.95,'Vzhodna omara: odprt hrbet in polna vrata pred R-H in razdelilnikom']
+],'prLegend','diamond');
+
+const plan=document.getElementById('plan');
+function tog(id,cls,head,leg){const t=document.getElementById(id);t.addEventListener('change',()=>{plan.classList.toggle(cls,t.checked);document.getElementById(head).classList.toggle('on',t.checked);document.getElementById(leg).classList.toggle('on',t.checked);});return t;}
+const elT=tog('elToggle','show-el','elHead','elLegend'),prT=tog('prToggle','show-pr','prHead','prLegend');
+if(/elektro/.test(location.hash)){elT.checked=true;elT.dispatchEvent(new Event('change'));}
+if(/predlog/.test(location.hash)){prT.checked=true;prT.dispatchEvent(new Event('change'));}
+
+/* elevations */
+const H=2.65,Z=z=>H-z;
+function mk(id,W,top){const V=document.getElementById(id);const t=top==null?H:top;V.setAttribute('viewBox',`-0.45 ${(H-t-0.32).toFixed(2)} ${W+0.75} ${(t+0.67).toFixed(2)}`);
+  S('rect',{x:-0.45,y:H-t-0.32,width:W+0.75,height:t+0.67,fill:'#FBF8F3'},V);return V;}
+function RE(V,x,z0,w,h,fill,extra){return S('rect',Object.assign({x,y:Z(z0+h),width:w,height:h,fill,stroke:'#5A4F45','stroke-width':0.006},extra||{}),V);}
+function T(V,x,z,s,size,fill,anchor){S('text',{x,y:Z(z),'font-size':size||0.065,'text-anchor':anchor||'middle','font-family':'Inter',fill:fill||'#6E645A'},V).textContent=s;}
+function hd(V,list){list.forEach(([a,b,t])=>{S('line',{x1:a,y1:H+0.12,x2:b,y2:H+0.12,stroke:'#8E8378','stroke-width':0.006},V);[a,b].forEach(x=>S('line',{x1:x,y1:H+0.08,x2:x,y2:H+0.16,stroke:'#8E8378','stroke-width':0.008},V));T(V,(a+b)/2,-0.26,t,0.075);});}
+function vd(V,list){list.forEach(([z,t])=>{S('line',{x1:-0.12,y1:Z(z),x2:-0.04,y2:Z(z),stroke:'#8E8378','stroke-width':0.008},V);T(V,-0.15,z-0.025,t,0.07,'#6E645A','end');});}
+function handle(V,x,z0,h){S('rect',{x:x-0.008,y:Z(z0+h),width:0.016,height:h,rx:0.008,fill:'#9C7A52'},V);}
+seed=23;const bc=['#C08A4E','#AEBFC6','#E6CBBB','#B7BDA1','#E3D3BC','#4E3D31','#D9C4A5','#9C6B48','#F3EEE4','#8C9A86'];
+function shelfBooks(V,x0,x1,z,hmax){let x=x0+0.02;while(x<x1-0.05){if(rnd()<0.07){x+=0.10;continue;}
+  const w=0.022+rnd()*0.022,h=Math.min(hmax,0.17+rnd()*0.10);S('rect',{x:x.toFixed(3),y:(Z(z)-h).toFixed(3),width:w.toFixed(3),height:h.toFixed(3),fill:bc[Math.floor(rnd()*bc.length)],stroke:'rgba(46,41,37,.35)','stroke-width':0.003},V);x+=w+0.003;}}
+
+/* H1: north wall 4.73 → 11.78 */
+(function(){const W=7.05,V=mk('h1',W);S('rect',{x:0,y:0,width:W,height:H,fill:C.wall},V);
+  RE(V,0,0,0.62,0.10,C.sageD);RE(V,0,0.10,0.62,2.53,C.sage);handle(V,0.57,0.95,0.35);T(V,0.31,1.85,'hladilnik',0.06,'#4F5544');
+  RE(V,0.62,0,1.67,0.10,C.sageD);RE(V,0.62,0.10,0.835,2.53,C.sage);RE(V,1.455,0.10,0.835,2.53,C.sage);handle(V,1.41,0.95,0.35);handle(V,1.50,0.95,0.35);
+  RE(V,2.29,0,0.25,H,C.larch);
+  RE(V,2.54,0,0.92,H,'#C99766',{stroke:C.larch,'stroke-width':0.03});for(let x=2.62;x<3.42;x+=0.115)S('line',{x1:x,y1:0.03,x2:x,y2:H-0.01,stroke:'rgba(110,70,35,.35)','stroke-width':0.006},V);
+  S('rect',{x:3.33,y:Z(1.65),width:0.03,height:0.75,rx:0.015,fill:'#4E3D31'},V);T(V,3.0,2.40,'vhodna vrata',0.06,'#5A4030');
+  RE(V,3.46,0,0.88,H,'#DCE7EA',{stroke:C.larch,'stroke-width':0.03});T(V,3.90,1.90,'fiksna zasteklitev',0.055,'#6E8790');
+  RE(V,3.49,0,0.82,0.40,C.oak);RE(V,3.53,0.04,0.36,0.15,C.veneer);RE(V,3.91,0.04,0.36,0.15,C.veneer);RE(V,3.53,0.21,0.74,0.15,C.veneer);
+  RE(V,3.50,0.40,0.80,0.07,C.blue,{rx:0.03});
+  [[4.42,1.08],[4.50,1.08],[4.58,1.08]].forEach(([x,z])=>RE(V,x-0.03,z,0.06,0.06,'#FBF8F3'));
+  RE(V,4.44,1.42,0.14,0.20,'#3A3430');RE(V,4.60,1.48,0.05,0.08,'#FBF8F3');T(V,4.505,1.70,'stikala',0.045);
+  S('line',{x1:2.40,y1:Z(1.11),x2:2.40,y2:Z(1.11),stroke:'none'},V);RE(V,2.37,1.08,0.06,0.06,'rgba(166,69,46,.2)',{stroke:'#A6452E','stroke-dasharray':'0.015 0.01'});
+  RE(V,4.67,0,2.36,0.10,C.sageD);[0,1,2].forEach(i=>{RE(V,4.67+i*0.787,0.10,0.787,2.53,C.sage);});handle(V,5.41,0.95,0.35);handle(V,5.50,0.95,0.35);handle(V,6.99,0.95,0.35);
+  S('rect',{x:5.40,y:Z(2.20),width:0.57,height:0.63,fill:'none',stroke:'#5A5048','stroke-width':0.008,'stroke-dasharray':'0.03 0.02'},V);T(V,5.685,1.85,'R-H',0.055,'#4F5544');
+  S('rect',{x:5.97,y:Z(0.96),width:0.74,height:0.66,fill:'none',stroke:'#5A5048','stroke-width':0.008,'stroke-dasharray':'0.03 0.02'},V);T(V,6.34,0.60,'talno gretje',0.05,'#4F5544');
+  S('ellipse',{cx:3.32,cy:0.025,rx:0.24,ry:0.05,fill:'#F6EEDD',stroke:'#B19C7E','stroke-width':0.006},V);
+  S('line',{x1:-0.08,y1:H,x2:W+0.08,y2:H,stroke:C.ink,'stroke-width':0.02},V);S('line',{x1:-0.08,y1:0,x2:W+0.08,y2:0,stroke:C.ink,'stroke-width':0.012},V);
+  hd(V,[[0,0.62,'62'],[0.62,2.29,'167'],[2.29,2.54,'24'],[2.54,3.46,'92'],[3.46,4.34,'88'],[4.34,4.67,'33'],[4.67,7.03,'236']]);
+  vd(V,[[0.45,'45'],[1.10,'110'],[2.65,'265']]);
+  T(V,0,2.80,'← kuhinja',0.07,'#6E645A','start');T(V,W,2.80,'WC →',0.07,'#6E645A','end');
+})();
+/* H2: bookcase seen from the hall looking south, east on the left */
+(function(){const W=4.59,V=mk('h2',W,1.45);
+  S('rect',{x:0,y:Z(1.45),width:W,height:1.45,fill:'#EEF0EC'},V);
+  S('line',{x1:0,y1:Z(1.30),x2:W,y2:Z(1.30),stroke:'#C9D3D6','stroke-width':0.006,'stroke-dasharray':'0.04 0.03'},V);
+  T(V,W/2,1.18,'pogled čez stopnišče proti jedilnici in jugu',0.06,'#8E9A9E');
+  RE(V,0.02,0,W-0.04,0.08,'#8E6C48');
+  RE(V,0,0.08,W,0.88,C.veneer);
+  for(let i=0;i<5;i++){const x0=i*0.918;RE(V,x0+0.02,0.10,0.878,0.36,'#E2C2B0',{stroke:'none'});RE(V,x0+0.02,0.48,0.878,0.38,'#E2C2B0',{stroke:'none'});
+    shelfBooks(V,x0+0.02,x0+0.898,0.10,0.33);shelfBooks(V,x0+0.02,x0+0.898,0.48,0.35);}
+  [0.46,0.86].forEach(z=>RE(V,0,z,W,0.02,C.veneer));
+  for(let i=0;i<=5;i++)RE(V,Math.min(i*0.918,W-0.02),0.08,0.02,0.88,C.veneer);
+  RE(V,-0.02,0.96,W+0.04,0.04,'#B88A5C');
+  const top=1.00;
+  S('ellipse',{cx:2.61,cy:Z(top+0.03),rx:0.13,ry:0.035,fill:'#E6CBBB',stroke:'#8E6C48','stroke-width':0.006},V);T(V,2.61,0.88,'ključi',0.05,'#6E645A');
+  S('path',{d:`M4.20 ${Z(top)} h0.16 l-0.03 ${-0.03} h-0.10 Z`,fill:'#4E3D31'},V);S('line',{x1:4.28,y1:Z(top+0.03),x2:4.28,y2:Z(top+0.30),stroke:'#4E3D31','stroke-width':0.012},V);
+  S('path',{d:`M4.14 ${Z(top+0.30)} h0.28 l-0.05 ${-0.16} h-0.18 Z`,fill:'#F3E2C4',stroke:'#B19C7E','stroke-width':0.006},V);
+  S('ellipse',{cx:1.20,cy:Z(top+0.14),rx:0.07,ry:0.14,fill:'#B7BDA1',stroke:'#5A4F45','stroke-width':0.006},V);
+  [[3.30,0.04,'#C08A4E'],[3.32,0.035,'#AEBFC6'],[3.29,0.04,'#E3D3BC']].reduce((z,[x,h,c])=>{RE(V,x,z,0.28,h,c);return z+h;},top);
+  S('path',{d:`M0.45 ${Z(top)} q0.06 -0.22 0.12 0 Z`,fill:'#8C9A86'},V);
+  S('line',{x1:-0.08,y1:H,x2:W+0.08,y2:H,stroke:C.ink,'stroke-width':0.02},V);
+  hd(V,[[0,W,'459']]);vd(V,[[0.46,'46'],[0.86,'86'],[1.00,'100']]);
+  T(V,0,1.62,'← vzhod',0.065,'#6E645A','start');T(V,W,1.62,'kuhinja →',0.065,'#6E645A','end');
+})();
+
+/* lighting table */
+const LT=[
+  ['1b, nad vhodom','Ena lepa stropna svetilka, npr. opalno steklo ali alabaster, Ø 40–50 cm','ok','obstoječa točka, nova svetilka'],
+  ['2a, 1a','Majhni vgradni reflektorji, enaki kot v kuhinji','ok','ostanejo'],
+  ['Omare, h = 2,2 m','Luč v zahodni in vzhodni omari, vklop ob odpiranju vrat','ok','ostanejo'],
+  ['1c','LED pod zgornjo polico knjižne ograje','ok','obstoječi izvod iz tal'],
+  ['1f / 1g','Luč pod predalnikom ob WC-ju','ok','ostane'],
+  ['B','LED pod klopjo s senzorjem gibanja za nočno pot','new','nov izvod 230 V na višini 15 cm'],
+  ['WC','Stenska svetilka nad ogledalom, npr. medenina in opalno steklo','new','neobvezen nov izvod na višini 180 cm']
+];
+const st={ok:['ok','ostane'],mv:['mv','premik'],new:['new','novo']};
+document.getElementById('lightBody').innerHTML=LT.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}<br><span class="muted">${r[3]}</span></td><td><span class="pill ${st[r[2]][0]}">${st[r[2]][1]}</span></td></tr>`).join('');
+
+/* budget */
+const B=[['Vzhodna omara 236 cm (mizar)',2500,3800],['Klop s predali in blazino',700,1300],['Knjižna ograja ob stopnišču, 459 cm, ozadja v mavčno roza',3100,5200],['Predalnik ob WC-ju + ogledalo',500,1100],['Vgradni predpražnik',250,600],['Stropna svetilka nad vhodom',300,900],['Keramika ali kip za polico ograje',300,1000],['WC v nadstropju: tapeta ali barva čez vse, ogledalo, stenska svetilka',600,1500]];
+const fmt=n=>n.toLocaleString('sl-SI')+' €';let lo=0,hi=0;
+document.getElementById('budgetBody').innerHTML=B.map(r=>{lo+=r[1];hi+=r[2];return `<tr><td>${r[0]}</td><td class="n">${fmt(r[1])} – ${fmt(r[2])}</td></tr>`;}).join('')+`<tr class="tot"><td>Skupaj predsoba in WC (cilj 11.000 €)</td><td class="n">${fmt(lo)} – ${fmt(hi)}</td></tr>`;
+
+/* briefs */
+document.getElementById('elBrief').textContent=
+`Hiša G, nadstropje, predsoba: dodatek k predlogu sprememb elektro inštalacij (osnutek 24. 10. 2026)
+Nadaljuje točke 1–9. Mere so od notranjih površin sten.
+
+10. Vhodna vrata se odpirajo navznoter proti zahodu (tečaji ob zahodnem podboju). Stikali 1 in 1.1 sta ob zahodnem podboju, kjer ju odprto krilo zakrije. Prosimo, prestavite ju na pas stene med fiksno zasteklitvijo in vzhodno omaro (širina okrog 27 cm, vzhodno od zasteklitve), k ostalim stikalom.
+11. Na tem pasu stene združiti stikala (h 110 cm), termostat T1 (h 150 cm) in videofon V1 (h 150 cm). Vzhodna omara se začne 27 cm vzhodno od zasteklitve.
+12. Klop pod fiksno zasteklitvijo: izvod 230 V na višini 15 cm za LED trak pod klopjo s senzorjem gibanja.
+13. Vzhodna omara (236 × 60 cm, do stropa) stoji pred elektro omarico R-H in razdelilnikom talnega gretja. Omara bo imela tam odprt hrbet in vrata čez celo višino; obe omarici ostaneta vgradni in dostopni.
+
+ZA IZVAJALCA ESTRIHA IN TERACA
+14. Vgradni predpražnik pred vhodnimi vrati: niša v estrihu okrog 90 × 70 cm (notranja stran vrat, od zahodnega roba krila do vzhodnega), globina po izbranem sistemu (običajno 2–2,5 cm), z robnim profilom. Izvesti pred vlivanjem teraca.
+
+WC V NADSTROPJU
+15. Izvod za stensko svetilko nad ogledalom na južni steni nad umivalnikom, na višini okrog 180 cm (neobvezno).`;
+document.getElementById('mzBrief').textContent=
+`Hiša G: dodatek k povpraševanju za pohištvo po meri, predsoba v nadstropju (osnutek 24. 10. 2026)
+Nadaljuje postavke 1–9. Vse mere so okvirne in jih je treba izmeriti na objektu.
+
+10. Vzhodna omara 236 × 60 × 265 cm, troje vrat do stropa, fronte enake kot zahodna omara in visoke kuhinjske omare (mat lak, žajbelj). Notranjost: obešalni del 80 cm, police za čevlje, prostor za sesalnik. Pred elektro omarico (okrog 57 × 63 cm, zgornji rob 220 cm) in razdelilnikom talnega gretja (okrog 74 × 66 cm) odprt hrbet, prezračevalna reža zgoraj.
+11. Klop pod fiksno zasteklitvijo 85 × 40 × 45 cm, hrast, dva predala za čevlje, oblazinjen sedež (lan). Utor za LED trak spodaj.
+12. Knjižna ograja ob severnem robu stopnišča 459 × 45 × 100 cm, hrast. Pet polj po okrog 92 cm, dve odprti polici proti predsobi, ozadje polj lakirano v mavčno roza, zgoraj polica iz masivnega hrasta 4 cm s skritim LED profilom spodaj. Stran proti stopnišču zaprta, gladka, brez opornih točk. Trdno sidrana v tla; ustreznost kot ograje potrdi arhitektka.
+13. Predalnik ob WC-ju 58 × 35 × 80 cm, hrast, viseč ali na nogah (spodaj obstoječa luč), in ogledalo 50 × 90 cm v hrastovem okvirju.`;
+document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',async()=>{const t=document.getElementById(b.dataset.for).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopirano';b.classList.add('done');setTimeout(()=>{b.textContent='Kopiraj besedilo';b.classList.remove('done');},2000);}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.for));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Označeno, kopiraj s Cmd+C';}}));
+})();
+</script>
+</body>
+</html>
